@@ -9,9 +9,12 @@ This mapping allows for consistent network packing/unpacking protocols independe
 ## Setup
 
 Install the following modules to enable plotting functionality:
-
+```
 pip install plotly
+```
+```
 pip install pandas
+```
 Install the following module to enable the bitarray generation:
 ```
 pip install bitarray
@@ -21,8 +24,9 @@ pip install bitarray
 The script takes in 2 input arguments: the first is the matrix dimension (must be a power of 2) and the second is for the number of random 1D bitarray frames the algorithm will generate.
 
 The following example will generate 32 frames on a 4x4x4 matrix map:
-
+```
 python spatial_encoder.py 4 32
+```
 Once the script completes it will generate a 'plotly' figure using your native browser. The initial frame will show a superposition of spatial bit mapping for all generated frames. Using the slider you can view a specific frames spatial mapping. Each point represents a bit that is has a state=True. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial bit map. By default each frame starts at point (0,0,0) and terminates at (0,0,3).
 
 ## License
