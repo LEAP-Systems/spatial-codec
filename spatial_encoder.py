@@ -11,9 +11,28 @@ class SpatialBit:
         self.pos = [x,y,z]
         #any non-zero state value is collapsed to true
         self.state = bool(state)
+        self.next = None
     
     def read(self):
         return self.pos, self.state
+
+class SpatialMap:
+    def __init__(self, size, xm, ym, zm, ba):
+        self.head = None
+        #build linked list from the last frame to the first in order to have the head start at first indice
+        for i in reversed(range(size)):
+            sb = SpatialBit(xm[i],ym[i],zm[i],ba[i])
+            sb.next = self.head
+            self.head = sb
+
+    def next(self):
+        if self.head == None:
+            raise ValueError("Traversed to end of hilbert spatial map.")
+        
+        current = self.head
+        self.head = current.next
+        return current
+
 
 #define masterlists for x,y and z coordinates
 xm = list()
@@ -75,8 +94,6 @@ hilbert_curve(args.dim,0,0,0,1,0,0,0,1,0,0,0,1)
 if  not all([len(xm), len(ym), len(zm)]) or len(xm) != size:
     raise IndexError
 
-spatial_arr = list()
-
 tx = list()
 ty = list()
 tz = list()
@@ -86,18 +103,18 @@ fig = go.Figure(
     layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
 )
 
+spatial_maps = list()
+
 #generate frame traces
 for steps in range(args.frames):
     #generate a random bitarray with length of cube size
     for i in range(size):
         ba.append(bool(random.getrandbits(1)))
 
-    for i in range(size):
-        spatial_arr.append(SpatialBit(xm[i],ym[i],zm[i],ba[i]))
-
+    spatial_maps.append(SpatialMap(size, xm, ym, zm, ba))
     #print only bits with an on state.
-    for i in range(len(spatial_arr)):
-        [x,y,z], state = spatial_arr[i].read()
+    for i in range(size):
+        [x,y,z], state = spatial_maps[steps].next().read()
         if state:
             tx.append(x)
             ty.append(y)
@@ -107,7 +124,6 @@ for steps in range(args.frames):
     tx.clear()
     ty.clear()
     tz.clear()
-    spatial_arr.clear()
     ba = bitarray()
 
 
