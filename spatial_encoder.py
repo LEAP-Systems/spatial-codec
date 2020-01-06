@@ -3,7 +3,17 @@ import pandas as pd
 from bitarray import bitarray
 import random
 import argparse
+from threading import Thread
+import time
 
+#define masterlists for x,y and z coordinates
+xm = list()
+ym = list()
+zm = list()
+
+tx = list()
+ty = list()
+tz = list()
 
 class SpatialBit:
 
@@ -34,10 +44,27 @@ class SpatialMap:
         return current
 
 
-#define masterlists for x,y and z coordinates
-xm = list()
-ym = list()
-zm = list()
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 def hilbert_curve(dim, x, y, z, dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3):
     if(dim==1):
@@ -64,7 +91,6 @@ def hilbert_curve(dim, x, y, z, dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3):
             y -= dim*dy3
         if(dz3<0): 
             z -= dim*dz3
-        
         hilbert_curve(dim, x, y, z, dx2, dy2, dz2, dx3, dy3, dz3, dx, dy, dz)
         hilbert_curve(dim, x+dim*dx, y+dim*dy, z+dim*dz, dx3, dy3, dz3, dx, dy, dz, dx2, dy2, dz2)
         hilbert_curve(dim, x+dim*dx+dim*dx2, y+dim*dy+dim*dy2, z+dim*dz+dim*dz2, dx3, dy3, dz3, dx, dy, dz, dx2, dy2, dz2)
@@ -73,7 +99,6 @@ def hilbert_curve(dim, x, y, z, dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3):
         hilbert_curve(dim, x+dim*dx+dim*dx2+dim*dx3, y+dim*dy+dim*dy2+dim*dy3, z+dim*dz+dim*dz2+dim*dz3, -dx3, -dy3, -dz3, dx, dy, dz, -dx2, -dy2, -dz2)
         hilbert_curve(dim, x+dim*dx+dim*dx3, y+dim*dy+dim*dy3, z+dim*dz+dim*dz3, -dx3, -dy3, -dz3, dx, dy, dz, -dx2, -dy2, -dz2)
         hilbert_curve(dim, x+dim*dx3, y+dim*dy3, z+dim*dz3, dx2, dy2, dz2, -dx3, -dy3, -dz3, -dx, -dy, -dz)
-
 
 #Argument Parsing
 parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
@@ -87,6 +112,7 @@ args = parser.parse_args()
 size = pow(args.dim,3)
 ba = bitarray()
 
+print("Generating Hilbert Curve...")
 #execute space filling algorithm for size dim
 hilbert_curve(args.dim,0,0,0,1,0,0,0,1,0,0,0,1)
 
@@ -94,9 +120,6 @@ hilbert_curve(args.dim,0,0,0,1,0,0,0,1,0,0,0,1)
 if  not all([len(xm), len(ym), len(zm)]) or len(xm) != size:
     raise IndexError
 
-tx = list()
-ty = list()
-tz = list()
 
 #create figure with base layout
 fig = go.Figure(
@@ -104,34 +127,43 @@ fig = go.Figure(
 )
 
 spatial_maps = list()
+decoded_hex = list()
 
 #generate frame traces
 for steps in range(args.frames):
+    printProgressBar(steps, args.frames-1, prefix = 'Generating Frame Data and Spatial Maps:    ', suffix = '', length = 50)
     #generate a random bitarray with length of cube size
     for i in range(size):
         ba.append(bool(random.getrandbits(1)))
 
     spatial_maps.append(SpatialMap(size, xm, ym, zm, ba))
-    #print only bits with an on state.
-    for i in range(size):
+    #define blank bit array for each spatial map traversal
+    ba = bitarray()
+    #print only bits with a state of 1, but decode all states
+    while spatial_maps[steps].head != None:
         [x,y,z], state = spatial_maps[steps].next().read()
         if state:
             tx.append(x)
             ty.append(y)
             tz.append(z)
+        #reconstruct bitarray from spatial map
+        ba.append(state)
     fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
+    #append decoded bitarray to decoded hex list 
+    decoded_hex.append(ba.tobytes().hex())
     #clear arrays
     tx.clear()
     ty.clear()
     tz.clear()
     ba = bitarray()
 
-
 steps = []
+print("Rendering 3D Scatter...")
 for i in range(len(fig.data)):
     step = dict(
         method="restyle",
         args=["visible", [False] * len(fig.data)],
+        label=decoded_hex[i],
     )
     step["args"][1][i] = True  # Toggle i'th trace to "visible"
     steps.append(step)
@@ -144,7 +176,7 @@ sliders = [dict(
 )]
 
 fig.update_layout(
-    sliders=sliders
+    sliders=sliders,
 )
 
 fig.show()
