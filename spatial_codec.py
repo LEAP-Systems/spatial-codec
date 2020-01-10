@@ -14,15 +14,46 @@ Version: 1.0
 Copyright © 2020 Christian Sargusingh
 """
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Method by user:Greenstick @ https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+#include status of imports via progress bar
 import argparse
+printProgressBar(1,8,prefix="Importing argparse             ")
 import random
+printProgressBar(2,8,prefix="Importing random               ")
 import time
+printProgressBar(3,8,prefix="Importing time                 ")
 from threading import Thread
+printProgressBar(4,8,prefix="Importing Thread               ")
 
 import numpy as np
+printProgressBar(5,8,prefix="Importing numpy                ")
 import pandas as pd
+printProgressBar(6,8,prefix="Importing pandas               ")
 import plotly.graph_objects as go
+printProgressBar(7,8,prefix="Importing plotly.graph_objects ")
 from bitarray import bitarray
+printProgressBar(8,8,prefix="Importing bitarray             ")
 
 
 class SpatialBit:
@@ -218,28 +249,8 @@ class SpatialCodec:
             if spatial_bitmap[i].read() in self._hilbert_master:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
         return ba
-            
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
-    """
-    Method by user:Greenstick @ https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
+
+
 
 # Argument Parsing
 parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
