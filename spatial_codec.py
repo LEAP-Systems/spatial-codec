@@ -1,5 +1,5 @@
 """
-Spatial Encoding™
+Spatial Codec™
 ------------------------------------------------------------
 Author: Christian Sargusingh
 Date: 2020-01-09
