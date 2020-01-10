@@ -245,8 +245,10 @@ class SpatialCodec:
             else:
                 printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
         
-            if spatial_bitmap[i].read() in self._hilbert_master:
+            try:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
+            except ValueError:
+                pass
         return ba
 
 parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
