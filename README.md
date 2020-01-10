@@ -32,7 +32,7 @@ The following example will generate 32 frames on a 4x4x4 matrix map:
 ```
 python spatial_encoder.py 4 32
 ```
-Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial bit mapping for all generated frames. Using the slider you can view a specific frames spatial mapping. Each point represents a bit that is has a `state=True`. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial bit map. By default each frame starts at point `(0,0,0)` and terminates at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
+Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial bit mapping for all generated frames. Using the slider you can view a specific frames spatial mapping. Each point represents a bit that is has a `state=True`. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial bit map. By default mapping of the MSB of the bitarray is at `(0,0,0)` with the corresponding LSB at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
 
 ## License
 
