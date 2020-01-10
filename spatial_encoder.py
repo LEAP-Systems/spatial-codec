@@ -1,14 +1,25 @@
-""" Spatial-Encoding
-
-
 """
+Spatial Encoding™
+------------------------------------------------------------
+Author: Christian Sargusingh
+Date: 2020-01-09
+Repoitory: https://github.com/cSDes1gn/spatial-encoding
+LICENSE and README availble in repository
+Version: 1.0
 
+#TODO:  Include 3D array of `SpatialBit` objects in `Frame`
+        Optimize decode() algorithm in `SpatialCodec`
+        Introduce Spatial Encryption™ scheme to Frame object
+
+Copyright © 2020 Christian Sargusingh
+"""
 
 import argparse
 import random
 import time
 from threading import Thread
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from bitarray import bitarray
@@ -118,7 +129,7 @@ class SpatialCodec:
         self._hilbert_master = list()
 
         # ensures dim parameter is a power of 2
-        if  pow(dim,1/2) % 2 != 0:
+        if  np.log2(self.size) % 1 != 0:
             raise ValueError
 
         print("Generating Hilbert Curve...")
@@ -128,8 +139,10 @@ class SpatialCodec:
         
             
 
-    # hilbert_curve def found:
     def hilbert_curve(self, dim, x, y, z, dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3):
+        """Recursively generates a set of coordinates for a hilbert space filling curve with 3D resolution `dim`
+        Algorithm based on solution by user:kylefinn @ https://stackoverflow.com/questions/14519267/algorithm-for-generating-a-3d-hilbert-space-filling-curve-in-python
+        """
         if(dim==1):
             # save as an immutable tuple
             self._hilbert_master.append((x,y,z))
@@ -162,8 +175,15 @@ class SpatialCodec:
             self.hilbert_curve(dim, x+dim*dx+dim*dx3, y+dim*dy+dim*dy3, z+dim*dz+dim*dz3, -dx3, -dy3, -dz3, dx, dy, dz, -dx2, -dy2, -dz2)
             self.hilbert_curve(dim, x+dim*dx3, y+dim*dy3, z+dim*dz3, dx2, dy2, dz2, -dx3, -dy3, -dz3, -dx, -dy, -dz)
 
-    # generates a Frame object
     def encode(self, ba):
+        """Encodes a 1D bitarray into a `Frame` object consisting of a collection of `SpatialBit` objects.
+
+        Args:
+            ba (`bitarray`): `ba` is the target `bitarray` object for encoding.
+
+        Returns:
+            frame (`Frame`): `frame` object built from a bitarray `ba` converted into a collection of `SpatialBit` objects
+        """
         frame = Frame()
         # construct spatial map by including only
         for i in range(len(self._hilbert_master)):
@@ -173,23 +193,30 @@ class SpatialCodec:
                 pass
         return frame
 
-    # Input a 3D spatial bitmap
-    # return decoded bitarray
-    def decode(self, spatial_bitmap):
+    def decode(self, frame):
+        """Decodes a `Frame` object into a 1D bitarray.
+
+        Args:
+            frame (`Frame`): `frame` object built from a bitarray `ba` converted into a collection of `SpatialBit` objects
+
+        Returns:
+            ba (`bitarray`): `ba` is the decoded 1D `bitarray` object from .
+        """
         #define a bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length)
         ba = bitarray(len(self._hilbert_master))
         ba.setall(False)
+        spatial_bitmap = frame.read()
         #Adjust bitarray true values based on spatial_bitmap
         for i in range(len(spatial_bitmap)):
+            printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
             # replace spatial_bitmap elements in bitarray
             if spatial_bitmap[i].read() in self._hilbert_master:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
         return ba
             
-
-# printProgress bar def found:
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
+    Method by user:Greenstick @ https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
     Call in a loop to create terminal progress bar
     @params:
         iteration   - Required  : current iteration (Int)
@@ -208,7 +235,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     # Print New Line on Complete
     if iteration == total: 
         print()
-
 
 # Argument Parsing
 parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
@@ -235,7 +261,6 @@ except ValueError:
 
 # generate frame traces
 for steps in range(args.frames):
-    printProgressBar(steps, args.frames-1, prefix = 'Generating Frame Data and Spatial Maps:    ', suffix = '', length = 50)
     # define empty bitarray
     ba = bitarray()
 
@@ -245,6 +270,7 @@ for steps in range(args.frames):
 
     # encode bitarray into list of Spatial bits
     frame = sc.encode(ba)
+    print("Encoded frame: " + str(steps))
     
     # Add the new trace to the scatter
     tx = frame.x
@@ -253,10 +279,10 @@ for steps in range(args.frames):
     fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
 
     # decode Frame object back into bitarray
-    ba2 = sc.decode(frame.read())
-
+    ba2 = sc.decode(frame)
+    print("Decoded frame: " + str(steps))
     # append decoded bitarray to decoded hex list for figure labelling
-    decoded_hex.append(ba.tobytes().hex())
+    decoded_hex.append(ba2.tobytes().hex())
     
     # clear arrays for next frame
     tx.clear()
