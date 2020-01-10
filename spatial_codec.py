@@ -208,7 +208,12 @@ class SpatialCodec:
         spatial_bitmap = frame.read()
         #Adjust bitarray true values based on spatial_bitmap
         for i in range(len(spatial_bitmap)):
-            printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
+            # fix for printprogressBar div by 0
+            if len(spatial_bitmap) <= 1:
+                print("Single iteration required.")
+            else:
+                printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
+            
             # replace spatial_bitmap elements in bitarray
             if spatial_bitmap[i].read() in self._hilbert_master:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
