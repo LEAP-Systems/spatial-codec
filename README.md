@@ -1,8 +1,10 @@
-# spatial-encoding
+# spatial-codec
 
 ## About
 
-This script is a visual demonstration of a specialized spatial encoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified dimension. The encoder takes a 1D bitarray and translates each bit to an equivalent set of 'spatial bits' consisting of a coordinate tuple [x,y,z] and a state (True or False) attribute. The encoding is mapped using Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension.
+This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates each True bit to an equivalent set of `SpatialBit` objects consisting of a coordinate tuple `(x,y,z)`. 
+
+The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which is a collection of `SpatialBit` objects. The result is a list of coordinate tuples with variable length.
 
 This mapping allows for consistent network packing/unpacking protocols independent of the cube dimensions. Furthermore it ensures that if a particular localized region of the 3D space is obstructed or is unreadable then the corresponding bit data errors will be localized to a set of neighbouring bits in 1D space which effectively reduces the severity of error across the whole message.
 
