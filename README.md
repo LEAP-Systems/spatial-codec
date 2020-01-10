@@ -26,7 +26,7 @@ This repository is staged: Version 1.0
 
 <a name="setup"></a>
 
-## Setup
+## 3. Setup
 Python3 is recommended for optimum results. Install the following modules to enable plotting functionality:
 ```
 pip install plotly
@@ -42,7 +42,7 @@ pip install bitarray
 
 <a name="run"></a>
 
-## Run
+## 4. Run
 
 The script takes in 2 input arguments: the first is the matrix dimension (must be a power of 2) and the second is for the number of random 1D `bitarray` frames the algorithm will generate.
 
@@ -55,6 +55,6 @@ Once the script completes it will generate a `plotly` figure using your native b
 
 <a name="lic"></a>
 
-## License
+## 5. License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
