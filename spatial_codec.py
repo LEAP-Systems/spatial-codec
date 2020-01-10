@@ -164,7 +164,6 @@ class SpatialCodec:
             raise ValueError
 
         print("Generating Hilbert Curve...")
-        # execute space filling algorithm for size dim
         self.hilbert_curve(dim,0,0,0,1,0,0,0,1,0,0,0,1)
         print("Recursive hilbert algorithm completed successfully.")
         
@@ -216,7 +215,7 @@ class SpatialCodec:
             frame (`Frame`): `frame` object built from a bitarray `ba` converted into a collection of `SpatialBit` objects
         """
         frame = Frame()
-        # construct spatial map by including only
+        # construct spatial map by including only True bits
         for i in range(len(self._hilbert_master)):
             if ba[i]:
                 frame.fill(SpatialBit(self._hilbert_master[i]))
@@ -233,51 +232,47 @@ class SpatialCodec:
         Returns:
             ba (`bitarray`): `ba` is the decoded 1D `bitarray` object from .
         """
-        #define a bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length)
+        # bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length) for 1 bit replacement
         ba = bitarray(len(self._hilbert_master))
         ba.setall(False)
         spatial_bitmap = frame.read()
-        #Adjust bitarray true values based on spatial_bitmap
+
+        # adjust bitarray true values based on spatial_bitmap
         for i in range(len(spatial_bitmap)):
             # fix for printprogressBar div by 0
             if len(spatial_bitmap) <= 1:
                 print("Single iteration required.")
             else:
                 printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
-            
-            # replace spatial_bitmap elements in bitarray
+        
             if spatial_bitmap[i].read() in self._hilbert_master:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
         return ba
 
-
-
-# Argument Parsing
 parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
 parser.add_argument('dim', metavar='dim', type=int, help='matrix dimension (must be a power of 2)')
 parser.add_argument('frames', metavar='frames',type=int, help='number of frames to generate.')
 args = parser.parse_args()
 
-# define a 3D cube of SpatialBits given a cube dimension using Hilberts space filling curve
+# size parameter is important for describing the voxel (3D pixel) resolution per frame 
+# ex/. for a 4x4x4 matrix the resolution is 64. In other words, there are 64 bits of information that can be encoded per frame
 size = pow(args.dim,3)
 
-# create figure with base layout
 fig = go.Figure(
     layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
 )
 
+# initialized for storing figure labels with decoded hex values
 decoded_hex = list()
 
-# Initialize spatial codec using hilberts space filling curve for a 'dim' dimensional 3D matric
 try:
     sc = SpatialCodec(args.dim)
 except ValueError:
     print("Argument dim must be a power of 2. Exiting.")
     exit(0)
 
-# generate frame traces
+
 for steps in range(args.frames):
-    # define empty bitarray
     ba = bitarray()
 
     # generate a random bitarray with length of cube size
@@ -297,6 +292,7 @@ for steps in range(args.frames):
     # decode Frame object back into bitarray
     ba2 = sc.decode(frame)
     print("Decoded frame: " + str(steps))
+
     # append decoded bitarray to decoded hex list for figure labelling
     decoded_hex.append(ba2.tobytes().hex())
     
