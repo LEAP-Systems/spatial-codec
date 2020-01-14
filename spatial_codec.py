@@ -144,10 +144,11 @@ class SpatialCodec:
     Attributes:
         size (`int`): `size` attribute defines the number of allowable SpatialBit objects per Frame
         _hilbert_master (:list:`tuple (x,y,z)`): list of tuple (x,y,z) coordinates defined by the internal recursive function `hilbert_curve`
+        fig (`dict`): `fig` is a dictionary containing the figure attribute initialization for a graphic object rendering spatial mapping in plotly
     """
     def __init__(self, dim):
         """Initializes empty `_hilbert_master` list. Defines `size` attribute which is the upper limit of `SpatialBit`
-        objects per frame. 
+        objects per frame. Intializes graphic object `fig` for rendering spatial mapping
 
         Args:
             dim (`int`): `dim` is the dimension of the 3D matrix. Hilbert's space filling algorithm restricts this dimension to powers of 2.
@@ -158,6 +159,9 @@ class SpatialCodec:
         """
         self.size = pow(dim,3)
         self._hilbert_master = list()
+        self.fig = go.Figure(
+            layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
+        )
 
         # ensures dim parameter is a power of 2
         if  np.log2(self.size) % 1 != 0:
@@ -260,9 +264,6 @@ args = parser.parse_args()
 # ex/. for a 4x4x4 matrix the resolution is 64. In other words, there are 64 bits of information that can be encoded per frame
 size = pow(args.dim,3)
 
-fig = go.Figure(
-    layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
-)
 
 # initialized for storing figure labels with decoded hex values
 decoded_hex = list()
@@ -289,7 +290,7 @@ for steps in range(args.frames):
     tx = frame.x
     ty = frame.y
     tz = frame.z
-    fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
+    sc.fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
 
     # decode Frame object back into bitarray
     ba2 = sc.decode(frame)
@@ -307,10 +308,10 @@ for steps in range(args.frames):
 steps = []
 print("Rendering 3D Scatter...")
 
-for i in range(len(fig.data)):
+for i in range(len(sc.fig.data)):
     step = dict(
         method="restyle",
-        args=["visible", [False] * len(fig.data)],
+        args=["visible", [False] * len(sc.fig.data)],
         label=decoded_hex[i],
     )
     step["args"][1][i] = True  # Toggle i'th trace to "visible"
@@ -322,9 +323,8 @@ sliders = [dict(
     pad={"t": 50},
     steps=steps
 )]
-
-fig.update_layout(
+sc.fig.update_layout(
     sliders=sliders,
 )
 
-fig.show()
+sc.fig.show()
