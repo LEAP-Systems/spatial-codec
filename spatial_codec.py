@@ -254,77 +254,87 @@ class SpatialCodec:
             except ValueError:
                 pass
         return ba
-
-parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
-parser.add_argument('dim', metavar='dim', type=int, help='matrix dimension (must be a power of 2)')
-parser.add_argument('frames', metavar='frames',type=int, help='number of frames to generate.')
-args = parser.parse_args()
-
-# size parameter is important for describing the voxel (3D pixel) resolution per frame 
-# ex/. for a 4x4x4 matrix the resolution is 64. In other words, there are 64 bits of information that can be encoded per frame
-size = pow(args.dim,3)
-
-
-# initialized for storing figure labels with decoded hex values
-decoded_hex = list()
-
-try:
-    sc = SpatialCodec(args.dim)
-except ValueError:
-    print("Argument dim must be a power of 2. Exiting.")
-    exit(0)
-
-
-for steps in range(args.frames):
-    ba = bitarray()
-
-    # generate a random bitarray with length of cube size
-    for i in range(size):
-        ba.append(bool(random.getrandbits(1)))
-
-    # encode bitarray into list of Spatial bits
-    frame = sc.encode(ba)
-    print("Encoded frame: " + str(steps))
     
-    # Add the new trace to the scatter
-    tx = frame.x
-    ty = frame.y
-    tz = frame.z
-    sc.fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
+    def render(self, ba_list):
+        """Renders a list of `bitarray` objects to a 3D scatter rendered using `plotly`
 
-    # decode Frame object back into bitarray
-    ba2 = sc.decode(frame)
-    print("Decoded frame: " + str(steps))
+        Args:
+            ba_list (:list:`bitarray`): `ba_list` is a list (size args.frames) of randomly generated bits (size args.dim^3)
+        """
+        # initialized for storing figure labels with decoded hex values
+        decoded_hex = list()
 
-    # append decoded bitarray to decoded hex list for figure labelling
-    decoded_hex.append(ba2.tobytes().hex())
+        for steps in range(len(ba_list)):
+            # encode bitarray into list of Spatial bits
+            frame = self.encode(ba_list[steps])
+            print("Encoded frame: " + str(steps))
+            
+            # Add the new trace to the scatter
+            tx = frame.x
+            ty = frame.y
+            tz = frame.z
+            self.fig.add_trace(go.Scatter3d(visible=True, x=tx,y=ty,z=tz))
+
+            # decode Frame object back into bitarray
+            ba = self.decode(frame)
+            print("Decoded frame: " + str(steps))
+
+            # append decoded bitarray to decoded hex list for figure labelling
+            decoded_hex.append(ba.tobytes().hex())
+            
+            # clear arrays for next frame
+            tx.clear()
+            ty.clear()
+            tz.clear()
+
+        steps = []
+        print("Rendering 3D Scatter...")
+
+        for i in range(len(self.fig.data)):
+            step = dict(
+                method="restyle",
+                args=["visible", [False] * len(self.fig.data)],
+                label=decoded_hex[i],
+            )
+            step["args"][1][i] = True  # Toggle i'th trace to "visible"
+            steps.append(step)
+
+        sliders = [dict(
+            active=0,
+            currentvalue={"prefix": "Frame: "},
+            pad={"t": 50},
+            steps=steps
+        )]
+
+        self.fig.update_layout(
+            sliders=sliders,
+        )
+
+        self.fig.show()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
+    parser.add_argument('dim', metavar='dim', type=int, help='matrix dimension (must be a power of 2)')
+    parser.add_argument('frames', metavar='frames',type=int, help='number of frames to generate.')
+    args = parser.parse_args()
+
+    # size parameter is important for describing the voxel (3D pixel) resolution per frame 
+    # ex/. for a 4x4x4 matrix the resolution is 64. In other words, there are 64 bits of information that can be encoded per frame
+    size = pow(args.dim,3)
+
+    ba_list = list()
+
+    # generate 'args.frames' number random bitarray with a length 'size'
+    for j in range(args.frames):  
+        ba = bitarray()  
+        for i in range(size):
+            ba.append(bool(random.getrandbits(1)))
+        ba_list.append(ba)
+
+    try:
+        sc = SpatialCodec(args.dim)
+    except ValueError:
+        print("Argument dim must be a power of 2. Exiting.")
+        exit(0)
     
-    # clear arrays for next frame
-    tx.clear()
-    ty.clear()
-    tz.clear()
-    ba = bitarray()
-
-steps = []
-print("Rendering 3D Scatter...")
-
-for i in range(len(sc.fig.data)):
-    step = dict(
-        method="restyle",
-        args=["visible", [False] * len(sc.fig.data)],
-        label=decoded_hex[i],
-    )
-    step["args"][1][i] = True  # Toggle i'th trace to "visible"
-    steps.append(step)
-
-sliders = [dict(
-    active=0,
-    currentvalue={"prefix": "Frame: "},
-    pad={"t": 50},
-    steps=steps
-)]
-sc.fig.update_layout(
-    sliders=sliders,
-)
-
-sc.fig.show()
+    sc.render(ba_list)
