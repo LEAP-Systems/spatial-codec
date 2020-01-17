@@ -57,4 +57,4 @@ Once the script completes it will generate a `plotly` figure using your native b
 
 ## 5. License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details
+This project has no license and is only subject to the viewing and fork permissions stated in the Terms of Service https://help.github.com/en/github/site-policy/github-terms-of-service
