@@ -44,12 +44,17 @@ pip install bitarray
 
 ## 4. Run
 
-The script takes in 2 input arguments: the first is the matrix dimension (must be a power of 2) and the second is for the number of random 1D `bitarray` frames the algorithm will generate.
+The script takes in 2 input arguments for the default run: the first is the matrix dimension (must be a power of 2) and the second is for the number of random 1D `bitarray` frames the algorithm will generate.
 
 The following example will generate 32 frames on a 4x4x4 matrix map:
 ```
 python spatial_encoder.py 4 32
 ```
+Alternatively the script can be run with an optional third input parameter defining a string hex code to be rendered:
+```
+python spatial_encoder.py 4 1 ffffffffffffffff
+```
+Note that the `frames` argument will be automatically set to 1 regardless of the value passed. If the 3rd argument is specified. If the length of the hexcode does not match the `dim` argument 
 Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial bit mapping for all generated frames. Using the slider you can view a specific frames spatial mapping. Each point represents a bit that is has a `state=True`. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial bit map. By default mapping of the MSB of the bitarray is at `(0,0,0)` with the corresponding LSB at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
 
 
