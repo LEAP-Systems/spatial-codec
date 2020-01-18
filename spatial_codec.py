@@ -316,20 +316,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates a sequence of 3D spatially encoded frames from sequence of 1D bitarrays.')
     parser.add_argument('dim', metavar='dim', type=int, help='matrix dimension (must be a power of 2)')
     parser.add_argument('frames', metavar='frames',type=int, help='number of frames to generate.')
+    parser.add_argument('bitarray', nargs='?', default=None, metavar='bitarray',type=str, help='custom hex definition. If arg specified script ignores previous frame argument.')
     args = parser.parse_args()
 
     # size parameter is important for describing the voxel (3D pixel) resolution per frame 
     # ex/. for a 4x4x4 matrix the resolution is 64. In other words, there are 64 bits of information that can be encoded per frame
     size = pow(args.dim,3)
-
     ba_list = list()
 
-    # generate 'args.frames' number random bitarray with a length 'size'
-    for j in range(args.frames):  
-        ba = bitarray()  
-        for i in range(size):
-            ba.append(bool(random.getrandbits(1)))
-        ba_list.append(ba)
+    # check for specified bitarray argument otherwise generate random bitarrays for each new frame
+    if args.bitarray:
+        ba_list.append(bitarray(bin(int(args.bitarray, base=16)).lstrip('0b')))
+    else:
+        # generate 'args.frames' number random bitarray with a length 'size'
+        for j in range(args.frames):  
+            ba = bitarray()
+            for i in range(size):
+                ba.append(bool(random.getrandbits(1)))
+            ba_list.append(ba)
 
     try:
         sc = SpatialCodec(args.dim)
