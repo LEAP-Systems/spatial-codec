@@ -51,7 +51,7 @@ The following example will generate 32 frames on a 4x4x4 matrix map:
 python spatial_encoder.py 4 32
 ```
 
-Alternatively the script can be run with an optional third input parameter defining a string hex code `bitarray` to be rendered. The following example will generate 1 frame mapping hexcode 0xffffffffffffffff to a 4x4x4 matrix map:
+Alternatively the script can be run with an optional third input parameter defining a string hex code `bitarray` to be rendered. The following example will generate 1 frame mapping hexcode `0xffffffffffffffff` to a 4x4x4 matrix map:
 ```
 python spatial_encoder.py 4 1 ffffffffffffffff
 ```
