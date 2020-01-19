@@ -51,12 +51,12 @@ The script takes in 2 input arguments for the default run: the first is the matr
 
 The following example will generate 32 frames on a 4x4x4 matrix map:
 ```
-python spatial_encoder.py 4 32
+python spatial_codec.py 4 32
 ```
 
 Alternatively the script can be run with an optional third input parameter defining a string hex code `bitarray` to be rendered. The following example will generate 1 frame mapping hexcode `0xffffffffffffffff` to a 4x4x4 matrix map:
 ```
-python spatial_encoder.py 4 1 ffffffffffffffff
+python spatial_codec.py 4 1 ffffffffffffffff
 ```
 Note that the `frames` argument will be automatically set to 1 regardless of the value passed if the `bitarray` argument is specified.
 
