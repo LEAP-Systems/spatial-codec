@@ -38,7 +38,10 @@ Install the following module to enable the `bitarray` generation:
 ```
 pip install bitarray
 ```
-
+Finally for console prints and script progress tracking:
+```
+pip install progress
+```
 
 <a name="run"></a>
 
