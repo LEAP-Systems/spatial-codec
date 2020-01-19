@@ -324,6 +324,10 @@ if __name__ == "__main__":
     size = pow(args.dim,3)
     ba_list = list()
 
+    # ensure bitarray length matches matrix dimension argument
+    if len(args.bitarray) != size/4:
+        raise ValueError("Mis-match of bitarray length and matrix dimension arguments.")
+
     # check for specified bitarray argument otherwise generate random bitarrays for each new frame
     if args.bitarray:
         ba_list.append(bitarray(bin(int(args.bitarray, base=16)).lstrip('0b')))
