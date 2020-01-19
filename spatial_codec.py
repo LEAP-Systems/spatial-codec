@@ -14,46 +14,36 @@ Version: 1.0
 Copyright © 2020 Christian Sargusingh
 """
 
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
-    """
-    Method by user:Greenstick @ https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
+from progress.bar import IncrementalBar
+from progress.spinner import Spinner
+
+lb = IncrementalBar('Importing argparse', max=8)
 
 #include status of imports via progress bar
 import argparse
-printProgressBar(1,8,prefix="Importing argparse             ")
+lb.next()
+lb.message = 'Importing random'
 import random
-printProgressBar(2,8,prefix="Importing random               ")
+lb.next()
+lb.message = 'Importing time'
 import time
-printProgressBar(3,8,prefix="Importing time                 ")
+lb.next()
+lb.message = 'Importing Thread'
 from threading import Thread
-printProgressBar(4,8,prefix="Importing Thread               ")
+lb.next()
+lb.message = 'Importing numpy'
 
 import numpy as np
-printProgressBar(5,8,prefix="Importing numpy                ")
+lb.next()
+lb.message = 'Importing pandas'
 import pandas as pd
-printProgressBar(6,8,prefix="Importing pandas               ")
+lb.next()
+lb.message = 'Importing plotly'
 import plotly.graph_objects as go
-printProgressBar(7,8,prefix="Importing plotly.graph_objects ")
+lb.next()
+lb.message = 'Importing bitarray'
 from bitarray import bitarray
-printProgressBar(8,8,prefix="Importing bitarray             ")
+lb.next()
 
 
 class SpatialBit:
@@ -167,7 +157,7 @@ class SpatialCodec:
         if  np.log2(self.size) % 1 != 0:
             raise ValueError
 
-        print("Generating Hilbert Curve...")
+        print("\nGenerating Hilbert Curve...")
         self.hilbert_curve(dim,0,0,0,1,0,0,0,1,0,0,0,1)
         print("Recursive hilbert algorithm completed successfully.")
         
@@ -243,12 +233,6 @@ class SpatialCodec:
 
         # adjust bitarray true values based on spatial_bitmap
         for i in range(len(spatial_bitmap)):
-            # fix for printprogressBar div by 0
-            if len(spatial_bitmap) <= 1:
-                print("Single iteration required.")
-            else:
-                printProgressBar(i, len(spatial_bitmap)-1, prefix = 'Decoding Spatial Bitmap:    ', suffix = '', length = 50)
-        
             try:
                 ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
             except ValueError:
@@ -264,11 +248,13 @@ class SpatialCodec:
         # initialized for storing figure labels with decoded hex values
         decoded_hex = list()
 
+        print("Rendering Spatial Bitmaps:")
+        spin = Spinner()
+
         for steps in range(len(ba_list)):
             # encode bitarray into list of Spatial bits
             frame = self.encode(ba_list[steps])
-            print("Encoded frame: " + str(steps))
-            
+            spin.message = 'Encoded frame: ' + str(steps) + ' '
             # Add the new trace to the scatter
             tx = frame.x
             ty = frame.y
@@ -277,20 +263,21 @@ class SpatialCodec:
 
             # decode Frame object back into bitarray
             ba = self.decode(frame)
-            print("Decoded frame: " + str(steps))
-
             # append decoded bitarray to decoded hex list for figure labelling
             decoded_hex.append(ba.tobytes().hex())
-            
+            spin.message = 'Decoded frame: ' + str(steps) + ' '
+
             # clear arrays for next frame
             tx.clear()
             ty.clear()
             tz.clear()
 
+            spin.next()
+
         steps = []
-        print("Rendering 3D Scatter...")
 
         for i in range(len(self.fig.data)):
+            spin.message = 'Drawing to plotly '
             step = dict(
                 method="restyle",
                 args=["visible", [False] * len(self.fig.data)],
@@ -298,6 +285,7 @@ class SpatialCodec:
             )
             step["args"][1][i] = True  # Toggle i'th trace to "visible"
             steps.append(step)
+            spin.next()
 
         sliders = [dict(
             active=0,
@@ -324,12 +312,12 @@ if __name__ == "__main__":
     size = pow(args.dim,3)
     ba_list = list()
 
-    # ensure bitarray length matches matrix dimension argument
-    if len(args.bitarray) != size/4:
-        raise ValueError("Mis-match of bitarray length and matrix dimension arguments.")
-
     # check for specified bitarray argument otherwise generate random bitarrays for each new frame
     if args.bitarray:
+        # ensure bitarray length matches matrix dimension argument
+        if len(args.bitarray) != size/4:
+            raise ValueError("Mis-match of bitarray length and matrix dimension arguments.")
+        
         ba_list.append(bitarray(bin(int(args.bitarray, base=16)).lstrip('0b')))
     else:
         # generate 'args.frames' number random bitarray with a length 'size'
