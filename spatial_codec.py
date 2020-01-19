@@ -317,8 +317,20 @@ if __name__ == "__main__":
         # ensure bitarray length matches matrix dimension argument
         if len(args.bitarray) != size/4:
             raise ValueError("Mis-match of bitarray length and matrix dimension arguments.")
+
+        b = bitarray(bin(int(args.bitarray, base=16)).lstrip('0b'))
+
+        # re append MSB cutoff of 0 bits by python bin() definition
+        if len(b) != 64:
+            bn = bitarray()
+            for i in range(64-len(b)):
+                bn.append(False)
+            bn.extend(b)
+            ba_list.append(bn)
+        else:
+            ba_list.append(b)
         
-        ba_list.append(bitarray(bin(int(args.bitarray, base=16)).lstrip('0b')))
+        
     else:
         # generate 'args.frames' number random bitarray with a length 'size'
         for j in range(args.frames):  
