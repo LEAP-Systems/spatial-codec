@@ -11,6 +11,8 @@
 
 ## 1. About
 
+![](.gif)
+
 This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates each True bit to an equivalent set of `SpatialBit` objects consisting of a coordinate tuple `(x,y,z)`. 
 
 The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which is a collection of `SpatialBit` objects. The result is a list of coordinate tuples with variable length. The spatial decoder takes a `Frame` object and uses a comparative algorithm to map each `SpatialBit` back to its correct index in the 1D `bitarray` mapping.
