@@ -330,7 +330,6 @@ if __name__ == "__main__":
         else:
             ba_list.append(b)
         
-        
     else:
         # generate 'args.frames' number random bitarray with a length 'size'
         for j in range(args.frames):  
