@@ -10,8 +10,7 @@
 <a name="about"></a>
 
 ## 1. About
-
-![](3DFractal.gif)
+<div style="text-align:center"><img src="3DFractal.gif" /></div>
 
 This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates each True bit to an equivalent set of `SpatialBit` objects consisting of a coordinate tuple `(x,y,z)`. 
 
