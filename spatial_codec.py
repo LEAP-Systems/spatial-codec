@@ -2,13 +2,12 @@
 Spatial Codec™
 ------------------------------------------------------------
 Author: Christian Sargusingh
-Date: 2020-01-09
+Date: 2020-02-12
 Repoitory: https://github.com/cSDes1gn/spatial-encoding
 LICENSE and README availble in repository
-Version: 1.0
+Version: 2.0
 
-#TODO:  Include 3D array of `SpatialBit` objects in `Frame`
-        Optimize decode() algorithm in `SpatialCodec`
+#TODO:  Optimize decode() algorithm in `SpatialCodec`
         Introduce Spatial Encryption™ scheme to Frame object
 
 Copyright © 2020 Christian Sargusingh
@@ -148,6 +147,7 @@ class SpatialCodec:
             based on the specified dimension `dim`.
         """
         self.size = pow(dim,3)
+        self.dim = dim
         self._hilbert_master = list()
         self.fig = go.Figure(
             layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
@@ -169,7 +169,7 @@ class SpatialCodec:
         """
         if(dim==1):
             # save as an immutable tuple
-            self._hilbert_master.append((x,y,z))
+            self._hilbert_master.append((int(x),int(y),int(z)))
         else:
             dim/=2
             if(dx<0): 
@@ -239,6 +239,38 @@ class SpatialCodec:
                 pass
         return ba
     
+    def translate(self):
+        """Translates the Hilbert master curve about the Z axis"""
+        # construct anti-diagonal identity matrix J
+        J = np.eye(self.dim)
+        for i in range(int(self.dim/2)):
+            J[:,[0+i,self.dim-1-i]] = J[:,[self.dim-1-i,0+i]]
+
+        print(J)
+        #3D matrix counting in arranged order
+        A = np.arange(pow(self.dim,3)).reshape(self.dim,self.dim,self.dim)
+        H = np.arange(pow(self.dim,3)).reshape(self.dim,self.dim,self.dim)
+        index = 0
+        for i in range(len(self._hilbert_master)):
+            x,y,z = self._hilbert_master[i]
+            H[z][x][y] = index
+            index += 1
+
+        print(H)
+
+        # to rotate the curve CW multiply the anti-diagonal identity J to the transpose of each layer of H: J*H[x]^T
+        for i in range(self.dim):
+            H[i][:][:] = np.matmul(H[i][:][:].T,J)
+        print("\n After CW translation:")
+
+        print(H)
+
+        for i in np.nditer(H):
+            self._hilbert_master[H[]] = 
+            H[z][x][y] = index
+            index += 1
+        
+
     def render(self, ba_list):
         """Renders a list of `bitarray` objects to a 3D scatter rendered using `plotly`
 
@@ -343,5 +375,8 @@ if __name__ == "__main__":
     except ValueError:
         print("Argument dim must be a power of 2. Exiting.")
         exit(0)
+    
+    print(sc._hilbert_master)
+    sc.translate()
     
     sc.render(ba_list)
