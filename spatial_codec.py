@@ -44,36 +44,6 @@ lb.message = 'Importing bitarray'
 from bitarray import bitarray
 lb.next()
 
-
-class SpatialBit:
-    """Class `SpatialBit` creates a bit with a tuple (x,y,z).
-
-    This object defines the base information unit in the 3D spatial dimension. Each `SpatialBit` is defined by a position tuple
-    which has an x y and z coordinate representing a `True` bit in 3D space.
-
-    Attributes:
-        _pos (`tuple(x,y,z)`): `_pos` defines the x, y and z coordinates of a `True` bit in 3D space
-    """
-    def __init__(self, pos):
-        """Initializes `_pos` with an x, y and z coordinate.
-        
-        Raises:
-            TypeError: ensures pos parameter has a length of 3 for (x,y,z) and is of type `tuple`
-        """
-        # ensure the type of pos is an (x,y,z) tuple
-        if type(pos) != tuple or len(pos) != 3:
-            raise TypeError
-        else:
-            self._pos = pos
-    
-    def read(self):
-        """Returns the stored `_pos` tuple within this instance of `SpatialBit`
-
-        Returns:
-            Returns the `_pos` tuple (x,y,z).
-        """
-        return self._pos
-
 class Frame:
     """Class `Frame` is a collection of `SpatialBit` objects contained within a single matrix frame.
 
@@ -83,38 +53,15 @@ class Frame:
     Attributes:
         _spatial_map (:list:`SpatialBit`): `_spatial_map` is a list of `SpatialBit` objects within instance of `Frame`
     """
-    def __init__(self):
+    def __init__(self, dim):
         """Initializes empty `_spatial_map` list. The length of this list will always be less than the allowed number of `SpatialBit`
         objects per frame.
         
         Raises:
             TypeError: ensures pos parameter has a length of 3 for (x,y,z) and is of type `tuple`
         """
-        self.x = list()
-        self.y = list()
-        self.z = list()
-        self._spatial_map = list()
-
-    def fill(self, sb):
-        """Appends a new `SpatialBit` object to the `_spatial_map` list within this instance of `Frame`. Updates internal `x`, `y` and `z`
-        lists with `SpatialBit` parameters.
-
-        Args:
-            sb (`SpatialBit`): `sb` is a `SpatialBit` object.
-
-        Raises:
-            TypeError: checks that `sb` parameter is of type `SpatialBit`
-        """
-        if type(sb) != SpatialBit:
-            raise TypeError
-        else:
-            self._spatial_map.append(sb)
-
-            # update hidden class attributes for 3D Scatter trace
-            x,y,z = sb.read()
-            self.x.append(x)
-            self.y.append(y)
-            self.z.append(z)
+        self.dim = dim
+        self.SM = np.zeros((self.dim,self.dim,self.dim), dtype=int)
     
     def read(self):
         """Returns the stored `_spatial_map` list within this instance of `Frame`
@@ -122,7 +69,13 @@ class Frame:
         Returns:
             Returns the `_spatial_map` list of `SpatialBit` objects.
         """
-        return self._spatial_map
+        return self.SM
+    
+    def components(self):
+        for i in range(self.dim):
+            for j in range(self.dim):
+                for k in range(self.dim):
+
 
 class SpatialCodec:
     """Class `SpatialCodec` defines the codec for spatial encoding and decoding based on Hilbert's space filling curve.
@@ -148,6 +101,7 @@ class SpatialCodec:
         """
         self.size = pow(dim,3)
         self.dim = dim
+        self.orient = 0 # default to 0
         self._hilbert_master = list()
         self.fig = go.Figure(
             layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
@@ -160,8 +114,19 @@ class SpatialCodec:
         print("\nGenerating Hilbert Curve...")
         self.hilbert_curve(dim,0,0,0,1,0,0,0,1,0,0,0,1)
         print("Recursive hilbert algorithm completed successfully.")
-        
+
+        # convert master list to a master matrix
+        self.HC = np.zeros((self.dim,self.dim,self.dim), dtype=int)
+        bit_index = 0
+        for i in range(len(self._hilbert_master)):
+            x,y,z = self._hilbert_master[i]
+            self.HC[int(z)][int(x)][int(y)] = bit_index
+            bit_index += 1
             
+        # construct anti-diagonal identity matrix J
+        self.J = np.eye(self.dim)
+        for i in range(int(self.dim/2)):
+            self.J[:,[0+i,self.dim-1-i]] = self.J[:,[self.dim-1-i,0+i]]
 
     def hilbert_curve(self, dim, x, y, z, dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3):
         """Recursively generates a set of coordinates for a hilbert space filling curve with 3D resolution `dim`
@@ -208,13 +173,16 @@ class SpatialCodec:
         Returns:
             frame (`Frame`): `frame` object built from a bitarray `ba` converted into a collection of `SpatialBit` objects
         """
-        frame = Frame()
-        # construct spatial map by including only True bits
-        for i in range(len(self._hilbert_master)):
-            if ba[i]:
-                frame.fill(SpatialBit(self._hilbert_master[i]))
-            else:   # included for structural clarity
-                pass
+        frame = Frame(self.dim)
+        # construct spatial map matrix by including only True bits
+        for i in range(self.dim):
+            for j in range(self.dim):
+                for k in range(self.dim):
+                    if ba[self.HC[i][j][k]] == 1:
+                        frame.SM[i][j][k] = 1
+                    else:
+                        pass
+        print(frame)
         return frame
 
     def decode(self, frame):
@@ -227,49 +195,50 @@ class SpatialCodec:
             ba (`bitarray`): `ba` is the decoded 1D `bitarray` object from .
         """
         # bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length) for 1 bit replacement
-        ba = bitarray(len(self._hilbert_master))
+        ba = bitarray(len(self.size))
         ba.setall(False)
-        spatial_bitmap = frame.read()
+        SM = frame.SM
 
         # adjust bitarray true values based on spatial_bitmap
-        for i in range(len(spatial_bitmap)):
-            try:
-                ba[self._hilbert_master.index(spatial_bitmap[i].read())] = True
-            except ValueError:
-                pass
+        bit_index = 0
+        for i in range(self.dim):
+            for j in range(self.dim):
+                for k in range(self.dim):
+                    if SM[i][j][k] == 0:
+                        ba[self.HC[i][j][k]] = 0
+                    elif SM[i][j][k] == 1:
+                        ba[self.HC[i][j][k]] = 1
+        print(ba)
         return ba
     
-    def translate(self):
+    def translate(self, dest):
         """Translates the Hilbert master curve about the Z axis"""
-        # construct anti-diagonal identity matrix J
-        J = np.eye(self.dim)
-        for i in range(int(self.dim/2)):
-            J[:,[0+i,self.dim-1-i]] = J[:,[self.dim-1-i,0+i]]
+        # assume default direction is 0
+        if self.orient == dest:
+            return
+        elif dest not in [0,1,2,3]:
+            raise ValueError
 
-        print(J)
-        #3D matrix counting in arranged order
-        A = np.arange(pow(self.dim,3)).reshape(self.dim,self.dim,self.dim)
-        H = np.arange(pow(self.dim,3)).reshape(self.dim,self.dim,self.dim)
-        index = 0
-        for i in range(len(self._hilbert_master)):
-            x,y,z = self._hilbert_master[i]
-            H[z][x][y] = index
-            index += 1
-
-        print(H)
-
-        # to rotate the curve CW multiply the anti-diagonal identity J to the transpose of each layer of H: J*H[x]^T
-        for i in range(self.dim):
-            H[i][:][:] = np.matmul(H[i][:][:].T,J)
-        print("\n After CW translation:")
-
-        print(H)
-
-        for i in np.nditer(H):
-            self._hilbert_master[H[]] = 
-            H[z][x][y] = index
-            index += 1
-        
+        if np.abs(self.orient+dest)%2 == 0:
+            print("Mirror translation:")
+            # perform mirror
+            for i in range(self.dim):
+                self.HC[i][:][:] = np.matmul(self.J, np.matmul(self.HC[i][:][:],self.J))
+        else:
+            if ((dest - self.orient) <= 0 and (dest - self.orient) >= -1) or ((dest - self.orient) < -1):
+                # to rotate the curve CCW multiply the anti-diagonal identity J to the transpose of each layer of HC: J*HC[x]^T
+                print("CCW translation:")
+                for i in range(self.dim):
+                    self.HC[i][:][:] = np.matmul(self.J,self.HC[i][:][:].T)
+            else:
+                # to rotate the curve CW multiply the transpose of each layer of HC to the anti-diagonal identity J: HC[x]^T*J
+                print("CW translation:")
+                for i in range(self.dim):
+                    self.HC[i][:][:] = np.matmul(self.HC[i][:][:].T,self.J)
+                
+        self.orient = dest
+        print(self.orient)
+        print(self.HC)
 
     def render(self, ba_list):
         """Renders a list of `bitarray` objects to a 3D scatter rendered using `plotly`
@@ -375,8 +344,8 @@ if __name__ == "__main__":
     except ValueError:
         print("Argument dim must be a power of 2. Exiting.")
         exit(0)
+
+    print(sc.HC)
+    sc.translate(2)
     
-    print(sc._hilbert_master)
-    sc.translate()
-    
-    sc.render(ba_list)
+    #sc.render(ba_list)
