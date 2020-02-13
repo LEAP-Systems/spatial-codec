@@ -60,6 +60,9 @@ class Frame:
         Raises:
             TypeError: ensures pos parameter has a length of 3 for (x,y,z) and is of type `tuple`
         """
+        self.x = [None for _ in range(pow(dim,3))]
+        self.y = [None for _ in range(pow(dim,3))]
+        self.z = [None for _ in range(pow(dim,3))]
         self.dim = dim
         self.SM = np.zeros((self.dim,self.dim,self.dim), dtype=int)
     
@@ -70,12 +73,24 @@ class Frame:
             Returns the `_spatial_map` list of `SpatialBit` objects.
         """
         return self.SM
-    
-    def components(self):
-        for i in range(self.dim):
-            for j in range(self.dim):
-                for k in range(self.dim):
 
+    def render_components(self):
+        while True:
+            try:
+                self.x.remove(None)
+            except ValueError:
+                break
+        while True:
+            try:
+                self.y.remove(None)
+            except ValueError:
+                break
+        while True:
+            try:
+                self.z.remove(None)
+            except ValueError:
+                break
+                    
 
 class SpatialCodec:
     """Class `SpatialCodec` defines the codec for spatial encoding and decoding based on Hilbert's space filling curve.
@@ -180,9 +195,13 @@ class SpatialCodec:
                 for k in range(self.dim):
                     if ba[self.HC[i][j][k]] == 1:
                         frame.SM[i][j][k] = 1
+                        frame.x[self.HC[i][j][k]] = j
+                        frame.y[self.HC[i][j][k]] = k
+                        frame.z[self.HC[i][j][k]] = i
                     else:
                         pass
-        print(frame)
+        print(frame.SM)
+        frame.render_components()
         return frame
 
     def decode(self, frame):
@@ -195,19 +214,18 @@ class SpatialCodec:
             ba (`bitarray`): `ba` is the decoded 1D `bitarray` object from .
         """
         # bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length) for 1 bit replacement
-        ba = bitarray(len(self.size))
+        ba = bitarray(self.size)
         ba.setall(False)
         SM = frame.SM
 
         # adjust bitarray true values based on spatial_bitmap
         bit_index = 0
         for i in range(self.dim):
+            SML = np.multiply(SM[i][:][:],self.HC[i][:][:]+1)
             for j in range(self.dim):
                 for k in range(self.dim):
-                    if SM[i][j][k] == 0:
-                        ba[self.HC[i][j][k]] = 0
-                    elif SM[i][j][k] == 1:
-                        ba[self.HC[i][j][k]] = 1
+                    if SML[j][k] != 0:
+                        ba[SML[j][k]-1] = 1
         print(ba)
         return ba
     
@@ -225,7 +243,7 @@ class SpatialCodec:
             for i in range(self.dim):
                 self.HC[i][:][:] = np.matmul(self.J, np.matmul(self.HC[i][:][:],self.J))
         else:
-            if ((dest - self.orient) <= 0 and (dest - self.orient) >= -1) or ((dest - self.orient) < -1):
+            if ((dest - self.orient) <= 0 and (dest - self.orient) >= -1) or ((dest - self.orient) > 1):
                 # to rotate the curve CCW multiply the anti-diagonal identity J to the transpose of each layer of HC: J*HC[x]^T
                 print("CCW translation:")
                 for i in range(self.dim):
@@ -346,6 +364,10 @@ if __name__ == "__main__":
         exit(0)
 
     print(sc.HC)
-    sc.translate(2)
-    
-    #sc.render(ba_list)
+
+    # Step 1: Translate HC
+    sc.translate(3)
+    # Step 2: Encode
+    # Step 3 Decode always at default
+    # NOTE: TCU has the ability to rotate and track its rotation with the hilbert curve. IRIS only knows one configuration of HC and simply decodes according to that
+    sc.render(ba_list)
