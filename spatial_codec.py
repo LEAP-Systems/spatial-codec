@@ -63,8 +63,7 @@ class Frame:
         self.x = [None for _ in range(pow(dim,3))]
         self.y = [None for _ in range(pow(dim,3))]
         self.z = [None for _ in range(pow(dim,3))]
-        self.dim = dim
-        self.SM = np.zeros((self.dim,self.dim,self.dim), dtype=int)
+        self.SM = np.zeros((dim,dim,dim), dtype=int)
     
     def read(self):
         """Returns the stored `_spatial_map` list within this instance of `Frame`
@@ -74,19 +73,12 @@ class Frame:
         """
         return self.SM
 
-    def render_components(self):
+    def condense_components(self):
+        # each list corresponds to a component of a coordinate set so the first time None is not found for one component will make it true for all other components
         while True:
             try:
                 self.x.remove(None)
-            except ValueError:
-                break
-        while True:
-            try:
                 self.y.remove(None)
-            except ValueError:
-                break
-        while True:
-            try:
                 self.z.remove(None)
             except ValueError:
                 break
@@ -195,13 +187,15 @@ class SpatialCodec:
                 for k in range(self.dim):
                     if ba[self.HC[i][j][k]] == 1:
                         frame.SM[i][j][k] = 1
+                        # update frame components for rendering
                         frame.x[self.HC[i][j][k]] = j
                         frame.y[self.HC[i][j][k]] = k
                         frame.z[self.HC[i][j][k]] = i
                     else:
                         pass
         print(frame.SM)
-        frame.render_components()
+        # component condensing setup for rendering
+        frame.condense_components()
         return frame
 
     def decode(self, frame):
@@ -336,9 +330,7 @@ if __name__ == "__main__":
         # ensure bitarray length matches matrix dimension argument
         if len(args.bitarray) != size/4:
             raise ValueError("Mis-match of bitarray length and matrix dimension arguments.")
-
         b = bitarray(bin(int(args.bitarray, base=16)).lstrip('0b'))
-
         # re append MSB cutoff of 0 bits by python bin() definition
         if len(b) != 64:
             bn = bitarray()
@@ -348,7 +340,6 @@ if __name__ == "__main__":
             ba_list.append(bn)
         else:
             ba_list.append(b)
-        
     else:
         # generate 'args.frames' number random bitarray with a length 'size'
         for j in range(args.frames):  
