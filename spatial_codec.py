@@ -1,14 +1,30 @@
 """
 Spatial Codec™
-------------------------------------------------------------
+==============
 Author: Christian Sargusingh
 Date: 2020-02-12
-Repoitory: https://github.com/cSDes1gn/spatial-encoding
-LICENSE and README availble in repository
+Repoitory: https://github.com/cSDes1gn/spatial-codec
+README availble in repository root
 Version: 2.0
 
-#TODO:  Optimize decode() algorithm in `SpatialCodec`
-        Introduce Spatial Encryption™ scheme to Frame object
+Dependancies
+------------
+>>> from progress.bar import IncrementalBar
+>>> from progress.spinner import Spinner
+>>> import argparse
+>>> import random
+>>> import time
+>>> import numpy as np
+>>> import pandas as pd
+>>> import plotly.graph_objects as go
+>>> from bitarray import bitarray
+
+Sample Runs
+-----------
+>>> python spatial_codec.py 4 1 ffffffffffffffff
+>>> python spatial_codec.py 8 64
+
+#TODO:  Introduce Spatial Encryption™ scheme to Frame object
 
 Copyright © 2020 Christian Sargusingh
 """
@@ -27,11 +43,7 @@ lb.next()
 lb.message = 'Importing time'
 import time
 lb.next()
-lb.message = 'Importing Thread'
-from threading import Thread
-lb.next()
 lb.message = 'Importing numpy'
-
 import numpy as np
 lb.next()
 lb.message = 'Importing pandas'
@@ -45,36 +57,38 @@ from bitarray import bitarray
 lb.next()
 
 class Frame:
-    """Class `Frame` is a collection of `SpatialBit` objects contained within a single matrix frame.
+    """Class `Frame` represents a 1D bitarray as a 3D matrix of specified size.
 
-    This object defines the emergence of `SpatialBit` objects storing them in a list. The x, y and z attributes are removable
-    and are included for easily adding a new 3D Scatter. Therefore they are not included in the docstring.
+    `Frame` is a wrapper for an encoded 3D spatially encoded bitarray. It includes a `read` method for returning the spatial map `SM`
+    and a `condense_components` method for adjusting the `x`,`y`,`z` attributes into a format that is readable to the plotly renderer.
 
     Attributes:
-        _spatial_map (:list:`SpatialBit`): `_spatial_map` is a list of `SpatialBit` objects within instance of `Frame`
+      * SM (`np.matrix`): `SM` is a 3D matrix of integers.
+      * x (`list`): `x` is a list of x components for 'on' bits within the frame.
+      * y (`list`): `y` is a list of y components for 'on' bits within the frame.
+      * z (`list`): `z` is a list of z components for 'on' bits within the frame.
     """
     def __init__(self, dim):
-        """Initializes empty `_spatial_map` list. The length of this list will always be less than the allowed number of `SpatialBit`
-        objects per frame.
-        
-        Raises:
-            TypeError: ensures pos parameter has a length of 3 for (x,y,z) and is of type `tuple`
-        """
+        """Initializes a dim^3 dimensional 3D matrix of zeroes."""
+        self.SM = np.zeros((dim,dim,dim), dtype=int)
+        # components are initialized to an empty list so that the components can be entered in the order which they appear according to
+        # Hilberts space filling curve
         self.x = [None for _ in range(pow(dim,3))]
         self.y = [None for _ in range(pow(dim,3))]
         self.z = [None for _ in range(pow(dim,3))]
-        self.SM = np.zeros((dim,dim,dim), dtype=int)
-    
+        
     def read(self):
-        """Returns the stored `_spatial_map` list within this instance of `Frame`
+        """Returns stored `SM` matrix within this instance of `Frame`.
 
         Returns:
-            Returns the `_spatial_map` list of `SpatialBit` objects.
+            Returns the `SM` matrix.
         """
         return self.SM
 
     def condense_components(self):
-        # each list corresponds to a component of a coordinate set so the first time None is not found for one component will make it true for all other components
+        """Formats the component lists by removing the leftover `None` type objects so component lists can be used by plotly renderer."""
+        # each list corresponds to a component of a coordinate set so the first time None is not found for one component will make it
+        # true for all other components
         while True:
             try:
                 self.x.remove(None)
@@ -87,26 +101,30 @@ class Frame:
 class SpatialCodec:
     """Class `SpatialCodec` defines the codec for spatial encoding and decoding based on Hilbert's space filling curve.
 
-    This object defines the codec for  of `SpatialBit` objects storing them in a list. The x, y and z attributes are removable
-    and are included for easily adding a new 3D Scatter. Therefore they are not included in the docstring.
+    `SpatialCodec` has two primary definitions `encode` & `decode` for converting `bitarray` objects into `Frame` objects and vice-versa.
+    This class also has two secondary functions `remap` & `render`. `remap` is a defintion specifically designed for the LEAP™ project. It
+    is a protected definition which can only be called by `TransmissionControlUnit` objects which allows the Transmission Control Software
+    to change the Hilbert space filling curve mapping to project the encoded frame to different access points (directions). The receiving
+    unit will always decode the frame according to a standardized method. `render` renders the encoded spatial map into a 3D matrix for the
+    purposes of validation testing and demonstration.
 
     Attributes:
-        size (`int`): `size` attribute defines the number of allowable SpatialBit objects per Frame
-        _hilbert_master (:list:`tuple (x,y,z)`): list of tuple (x,y,z) coordinates defined by the internal recursive function `hilbert_curve`
-        fig (`dict`): `fig` is a dictionary containing the figure attribute initialization for a graphic object rendering spatial mapping in plotly
+      * dim (`int`): `dim` attribute defines the dimension of the the 3D matrix spatial map.
+      * orient (`int`): `orient` defines the orientation of the hilbert curve mapping. The default orientation is 0 followed by 1>2>3>0 in CW rotation
+      * _hilbert_master (`tuple (x,y,z)`): list of tuple (x,y,z) coordinates defined by the internal recursive function `hilbert_curve`
+      * fig (`dict`): `fig` is a dictionary containing the figure attribute initialization for a graphic object rendering spatial mapping in plotly
+      * HC (`np.matrix`): Holds `bitarray` index numbers in a 3D matrix defined by the hilberts space filling curve and shape is described by `dim`.
+      * J (`np.matrix`): Defines an 2D anti-diagonal matrix for rotating each layer (xy plane) of a `Frame`.
     """
     def __init__(self, dim):
-        """Initializes empty `_hilbert_master` list. Defines `size` attribute which is the upper limit of `SpatialBit`
-        objects per frame. Intializes graphic object `fig` for rendering spatial mapping
+        """Initializes empty `_hilbert_master` list. Intializes graphic object `fig` for rendering spatial mapping
 
         Args:
-            dim (`int`): `dim` is the dimension of the 3D matrix. Hilbert's space filling algorithm restricts this dimension to powers of 2.
+          * dim (`int`): `dim` is the dimension of the 3D matrix. Hilbert's space filling algorithm restricts this dimension to powers of 2.
         
         Raises:
-            IndexError: ensures the internal `hilbert_curve` definition generates a `_hilbert_master` size that matches the expected size
-            based on the specified dimension `dim`.
+          * `ValueError`: Is raised if the parameter `dim` is not a power of two. `hilbert_curve` only works for matrix sizes which are powers of 2.
         """
-        self.size = pow(dim,3)
         self.dim = dim
         self.orient = 0 # default to 0
         self._hilbert_master = list()
@@ -114,8 +132,8 @@ class SpatialCodec:
             layout = go.Layout(title="3D Spatial Mapping of Randomly Generated 1D Bitarray using Hilberts Space Filling Curve.")
         )
 
-        # ensures dim parameter is a power of 2
-        if  np.log2(self.size) % 1 != 0:
+        # entry check to hilberts_curve to ensure dim parameter is a power of 2
+        if  np.log2(self.dim) % 1 != 0:
             raise ValueError
 
         print("\nGenerating Hilbert Curve...")
@@ -208,7 +226,7 @@ class SpatialCodec:
             ba (`bitarray`): `ba` is the decoded 1D `bitarray` object from .
         """
         # bitarray defined with 0's with a length equal to the masterlist (has dim encoded by masterlist length) for 1 bit replacement
-        ba = bitarray(self.size)
+        ba = bitarray(pow(self.dim,3))
         ba.setall(False)
         SM = frame.SM
 
@@ -223,8 +241,8 @@ class SpatialCodec:
         print(ba)
         return ba
     
-    def translate(self, dest):
-        """Translates the Hilbert master curve about the Z axis"""
+    def remap(self, dest):
+        """Protected definition. Modifies `SpatialCodec` Hilbert curve by translating about the Z axis."""
         # assume default direction is 0
         if self.orient == dest:
             return
@@ -357,7 +375,7 @@ if __name__ == "__main__":
     print(sc.HC)
 
     # Step 1: Translate HC
-    sc.translate(3)
+    sc.remap(3)
     # Step 2: Encode
     # Step 3 Decode always at default
     # NOTE: TCU has the ability to rotate and track its rotation with the hilbert curve. IRIS only knows one configuration of HC and simply decodes according to that
