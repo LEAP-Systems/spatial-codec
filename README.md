@@ -15,6 +15,7 @@
 </p>
 This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates the bit pattern to an equivalent spatial map using a 3D matrix with specified resolution.
 
+
 The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which comprises of a 3D matrix with bits mapped according to Hilbert's space filling curve. The spatial decoder takes a `Frame` object and matrix element multiplication to find a reduced index matrix in order to reconstruct the 1D `bitarray` mapping.
 
 HSFC mapping allows for consistent network packing/unpacking protocols independent of the cube dimensions. Furthermore it ensures that if a localized region of the 3D space is obstructed or is unreadable, the corresponding bit data errors will be localized to a set of neighbouring bits along its 1D space which effectively reduces the severity of error across the whole message.
