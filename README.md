@@ -25,7 +25,7 @@ HSFC mapping allows for consistent network packing/unpacking protocols independe
 ## 2. Version
 This repository is staged: Version 2.0
 
-# v2.0 update:
+### v2.0 update:
 1. `Frame` and `SpatialCodec` implementation replaced `SpatialBit` list-based algorithm with 3D `numpy` matrices. Matrices allowed for linear algebra transformations which increase mapping computing efficiency for encoding and decoding.
 2. Matrix-based implementation enabled a `remap` definition which rotates the hilbert curve spatial map to a specified viewing direction about its vertical axis. This enables encoding for different viewframes.
 3. Docstring updates for better readability
