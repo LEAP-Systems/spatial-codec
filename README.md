@@ -13,17 +13,22 @@
 <p align="center">
   <img src="3DFractal.gif"/>
 </p>
-This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates each True bit to an equivalent set of `SpatialBit` objects consisting of a coordinate tuple `(x,y,z)`. 
+This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates the bit pattern to an equivalent spatial map using a 3D matrix with specified resolution. 
 
-The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which is a collection of `SpatialBit` objects. The result is a list of coordinate tuples with variable length. The spatial decoder takes a `Frame` object and uses a comparative algorithm to map each `SpatialBit` back to its correct index in the 1D `bitarray` mapping.
+The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which comprises of a 3D matrix with bits mapped according to Hilbert's space filling curve. The spatial decoder takes a `Frame` object and matrix element multiplication to find a reduced index matrix in order to reconstruct the 1D `bitarray` mapping.
 
-This mapping allows for consistent network packing/unpacking protocols independent of the cube dimensions. Furthermore it ensures that if a particular localized region of the 3D space is obstructed or is unreadable then the corresponding bit data errors will be localized to a set of neighbouring bits in 1D space which effectively reduces the severity of error across the whole message.
+HSFC mapping allows for consistent network packing/unpacking protocols independent of the cube dimensions. Furthermore it ensures that if a localized region of the 3D space is obstructed or is unreadable, the corresponding bit data errors will be localized to a set of neighbouring bits along its 1D space which effectively reduces the severity of error across the whole message.
 
 
 <a name="version"></a>
 
 ## 2. Version
-This repository is staged: Version 1.0
+This repository is staged: Version 2.0
+
+# v2.0 update:
+1. `Frame` and `SpatialCodec` implementation replaced `SpatialBit` list-based algorithm with 3D `numpy` matrices. Matrices allowed for linear algebra transformations which increase mapping computing efficiency for encoding and decoding.
+2. Matrix-based implementation enabled a `remap` definition which rotates the hilbert curve spatial map to a specified viewing direction about its vertical axis. This enables encoding for different viewframes.
+3. Docstring updates for better readability
 
 
 <a name="setup"></a>
@@ -62,7 +67,7 @@ python spatial_codec.py 4 1 ffffffffffffffff
 ```
 Note that the `frames` argument will be automatically set to 1 regardless of the value passed if the `bitarray` argument is specified.
 
-Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial bit mapping for all generated frames. Using the slider you can view a specific frames spatial mapping. Each point represents a bit that is has a `state=True`. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial bit map. By default mapping of the MSB of the bitarray is at `(0,0,0)` with the corresponding LSB at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
+Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial maps for all generated frames. Using the slider you can view spatial maps for individual frames. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial map. By default mapping orientation (``SpatialCodec.orient = 0``), the MSB of the bitarray is at `(0,0,0)` with the corresponding LSB at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
 
 
 <a name="lic"></a>
