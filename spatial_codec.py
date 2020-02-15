@@ -30,7 +30,7 @@ Copyright © 2020 Christian Sargusingh
 
 from progress.bar import IncrementalBar
 
-lb = IncrementalBar('Importing argparse', max=8)
+lb = IncrementalBar('Importing argparse', max=7)
 
 #include status of imports via progress bar
 import argparse
