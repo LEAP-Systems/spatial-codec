@@ -1,22 +1,28 @@
 # Spatial Codec™
 
-1. [ About ](#about)
-2. [ Version ](#version)
-3. [ Setup ](#setup)
-4. [ Run ](#run)
-5. [ License ](#lic)
+- [Spatial Codec™](#spatial-codec%e2%84%a2)
+  - [1. About](#1-about)
+  - [2. Version](#2-version)
+    - [v2.0 update:](#v20-update)
+  - [3. Setup](#3-setup)
+  - [4. Run](#4-run)
+  - [5. License](#5-license)
 
 
 <a name="about"></a>
 
 ## 1. About
 <p align="center">
-  <img src="3DFractal.gif"/>
+  <img src="img/3DFractal.gif"/>
 </p>
 
 This script is a visual demonstration of a specialized spatial encoding and decoding algorithm developed for mapping a 1D bitarray to a 3D matrix with a specified voxel (3D pixel) resolution. The encoder takes a 1D bitarray and translates the bit pattern to an equivalent spatial map using a 3D matrix with specified resolution.
 
 The spatial encoder maps according to Hilbert's space filling curve (https://en.wikipedia.org/wiki/Hilbert_curve) which preserves localized bits in 1D to geometry in 3D independant of the matrix dimension. The encoder generates a `Frame` object which comprises of a 3D matrix with bits mapped according to Hilbert's space filling curve. The spatial decoder takes a `Frame` object and matrix element multiplication to find a reduced index matrix in order to reconstruct the 1D `bitarray` mapping.
+
+<p align="center">
+  <img src="img/Codec.gif"/>
+</p>
 
 HSFC mapping allows for consistent network packing/unpacking protocols independent of the cube dimensions. Furthermore it ensures that if a localized region of the 3D space is obstructed or is unreadable, the corresponding bit data errors will be localized to a set of neighbouring bits along its 1D space which effectively reduces the severity of error across the whole message.
 
