@@ -1,17 +1,17 @@
 # Spatial Codec™
 
 - [Spatial Codec™](#spatial-codec%e2%84%a2)
-  - [1. About](#1-about)
-  - [2. Version](#2-version)
+  - [About](#about)
+  - [Version](#version)
     - [v2.0 update:](#v20-update)
-  - [3. Setup](#3-setup)
-  - [4. Run](#4-run)
-  - [5. License](#5-license)
+  - [Setup](#setup)
+  - [Run](#run)
+  - [License](#license)
 
 
 <a name="about"></a>
 
-## 1. About
+## About
 <p align="center">
   <img src="img/3DFractal.gif"/>
 </p>
@@ -29,7 +29,7 @@ HSFC mapping allows for consistent network packing/unpacking protocols independe
 
 <a name="version"></a>
 
-## 2. Version
+## Version
 This repository is staged: Version 2.0
 
 ### v2.0 update:
@@ -40,7 +40,7 @@ This repository is staged: Version 2.0
 
 <a name="setup"></a>
 
-## 3. Setup
+## Setup
 Python3 is recommended for optimum results. Install the following modules to enable plotting functionality:
 ```
 pip install plotly
@@ -59,7 +59,7 @@ pip install progress
 
 <a name="run"></a>
 
-## 4. Run
+## Run
 
 The script takes in 2 input arguments for the default run: the first is the matrix dimension `dim` whose input must be a power of 2. The second argument `frames` defines the number of random 1D bitarray frames the algorithm will generate.
 
@@ -79,6 +79,6 @@ Once the script completes it will generate a `plotly` figure using your native b
 
 <a name="lic"></a>
 
-## 5. License
+## License
 
-This project has no license and is only subject to the viewing and fork permissions stated in the Terms of Service https://help.github.com/en/github/site-policy/github-terms-of-service
+BSD 2-Clause License available [here](LICENSE)
