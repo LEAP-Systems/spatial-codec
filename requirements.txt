@@ -1,0 +1,2 @@
+plotly>=4.4.1
+bitarray>=1.1.0
