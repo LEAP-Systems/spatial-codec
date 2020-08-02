@@ -1,20 +1,18 @@
 """
 Spatial Codec™
 ==============
-Author: Christian Sargusingh
-Date: 2020-02-12
+Contributors: Christian Sargusingh
+Updated: 2020-07
 Repoitory: https://github.com/cSDes1gn/spatial-codec
 README availble in repository root
 Version: 2.0
 
 Dependancies
 ------------
->>> from progress.bar import IncrementalBar
 >>> import argparse
 >>> import random
 >>> import time
 >>> import numpy as np
->>> import pandas as pd
 >>> import plotly.graph_objects as go
 >>> from bitarray import bitarray
 
@@ -23,36 +21,16 @@ Sample Runs
 >>> python spatial_codec.py 4 1 ffffffffffffffff
 >>> python spatial_codec.py 8 64
 
-#TODO:  Introduce Spatial Encryption™ scheme to Frame object
-
 Copyright © 2020 Christian Sargusingh
 """
 
-from progress.bar import IncrementalBar
-
-lb = IncrementalBar('Importing argparse', max=7)
-
 #include status of imports via progress bar
 import argparse
-lb.next()
-lb.message = 'Importing random'
 import random
-lb.next()
-lb.message = 'Importing time'
 import time
-lb.next()
-lb.message = 'Importing numpy'
 import numpy as np
-lb.next()
-lb.message = 'Importing pandas'
-import pandas as pd
-lb.next()
-lb.message = 'Importing plotly'
 import plotly.graph_objects as go
-lb.next()
-lb.message = 'Importing bitarray'
 from bitarray import bitarray
-lb.next()
 
 class bcolors:
     HEADER = '\033[95m'
