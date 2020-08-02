@@ -1,15 +1,12 @@
 # Spatial Codec™
 
-- [Spatial Codec™](#spatial-codec%e2%84%a2)
-  - [About](#about)
-  - [Version](#version)
-    - [v2.0 update:](#v20-update)
-  - [Setup](#setup)
-  - [Run](#run)
-  - [License](#license)
+## Navigation
+  1. [About](#about)
+  2. [Version](#version)
+  3. [Setup](#setup)
+  4. [Run](#run)
+  5. [License](#license)
 
-
-<a name="about"></a>
 
 ## About
 <p align="center">
@@ -41,21 +38,11 @@ This repository is staged: Version 2.0
 <a name="setup"></a>
 
 ## Setup
-Python3 is recommended for optimum results. Install the following modules to enable plotting functionality:
+Python3 is recommended for optimum results. For first time setup run:
+```bash
+./setup.sh
 ```
-pip install plotly
-```
-```
-pip install pandas
-```
-Install the following module to enable the `bitarray` generation:
-```
-pip install bitarray
-```
-Finally for console prints and script progress tracking:
-```
-pip install progress
-```
+
 
 <a name="run"></a>
 
