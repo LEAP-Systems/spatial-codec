@@ -17,7 +17,7 @@ Sample Runs
 Copyright © 2020 Christian Sargusingh
 """
 
-from N2.plot import Visualizer
+from sc.visualizer import Visualizer
 
 class N2:
     def __init__(self, fx:int, fy:int):
