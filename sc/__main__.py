@@ -1,4 +1,4 @@
 
-from N2.n2 import N2
+from sc.scodec import SpatialCodec
 
-n2 = N2(10,10)
+SpatialCodec(10,10)

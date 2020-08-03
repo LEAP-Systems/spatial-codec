@@ -19,7 +19,7 @@ Copyright © 2020 Christian Sargusingh
 
 from sc.visualizer import Visualizer
 
-class N2:
+class SpatialCodec:
     def __init__(self, fx:int, fy:int):
         self.frame = (fx,fy)
         self.targets = set()
