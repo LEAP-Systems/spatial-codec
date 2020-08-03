@@ -22,10 +22,4 @@ from sc.visualizer import Visualizer
 class SpatialCodec:
     def __init__(self, fx:int, fy:int):
         self.frame = (fx,fy)
-        self.targets = set()
         self.visualizer = Visualizer(self.frame)
-    
-    def populate(self, targets:set):
-        self.targets = targets
-
-    
