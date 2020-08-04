@@ -29,7 +29,7 @@ class SpatialCodec:
         self.visualizer = Visualizer(self.frame)
         self.iteration = 0
         self.scale = 1
-        n = 64
+        n = fx
 
         inputs = [self.d2xy(n**2, x) for x in range(n**2)]
         self.visualizer.line(inputs)
