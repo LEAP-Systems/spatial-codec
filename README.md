@@ -63,6 +63,20 @@ Note that the `frames` argument will be automatically set to 1 regardless of the
 
 Once the script completes it will generate a `plotly` figure using your native browser. The initial frame will show a superposition of spatial maps for all generated frames. Using the slider you can view spatial maps for individual frames. The connecting lines follow the sequence in which the 1D bitarray constructs the 3D spatial map. By default mapping orientation (``SpatialCodec.orient = 0``), the MSB of the bitarray is at `(0,0,0)` with the corresponding LSB at `(0,0,dim-1)` where `dim` is the user specified matrix dimension.
 
+<a name="libraries, frameworks and tools used">
+
+Node.js(npm) to run JS on machine terminal for Ubuntu (WSL). Though it states 18.04 LTS, it should work for 
+Ubuntu 20.04 LTS. 
+https://docs.microsoft.com/en-us/windows/nodejs/setup-on-wsl2
+
+Install Yarn with and add no install recommends since nvm and node installations were completed in previous
+command: 
+sudo apt update && sudo apt install --no-install-recommends yarn
+
+
+Utilized React for frontend:
+To start front-end run the command in sc-frontend directory:
+yarn start
 
 <a name="lic"></a>
 
