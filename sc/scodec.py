@@ -16,7 +16,7 @@ Dependancies
 
 Copyright © 2020 Christian Sargusingh
 """
-
+import math
 from sc.visualizer import Visualizer
 
 class SpatialCodec:
@@ -30,8 +30,11 @@ class SpatialCodec:
         self.iteration = 0
         self.scale = 1
         n = fx
-
-        inputs = [self.d2xy(n**2, x) for x in range(n**2)]
+        # for 2D
+        self.res = n**2
+        # self.encode(10)
+        self.s = [2**x for x in range(int(math.sqrt(self.res)))]
+        inputs = [self.encode(x) for x in range(self.res)]
         self.visualizer.line(inputs)
 
 
@@ -43,7 +46,7 @@ class SpatialCodec:
         # s3 = ((0,self.ry-offset), (self.rx/2, self.ry-offset), (self.rx/2,self.ry/2-offset), (0, self.ry/2-offset))
         # s4 = ((0+offset,self.ry-offset), (self.rx/2+offset, self.ry-offset), (self.rx/2+offset,self.ry/2-offset), (0+offset, self.ry/2-offset))
 
-    def xy2d(self, n:int, x:int, y:int) -> int:
+    def decode(self, n:int, x:int, y:int) -> int:
         """
         convert (x,y) to d
         """
@@ -53,36 +56,46 @@ class SpatialCodec:
             rx = (x & s) > 0
             ry = (y & s) > 0
             d += 2 * s * ((3 * rx) ^ ry)
-            self.rot(n, x, y, rx, ry)
+            if ry == 0:
+                self.transform(n, x, y, rx)
             s = int(s/2)
         return d
 
-    def d2xy(self, n:int, d:int) -> tuple:
+    def encode(self, index:int) -> tuple:
         """
         convert d to (x,y)
         """
-        t=d
         x,y = 0,0
-        s = 1
-        while s < n:
-            rx = 1 & (int(t/2))
-            ry = 1 & (t ^ rx)
-            x,y = self.rot(s, x, y, rx, ry)
+        for i,s in enumerate(self.s):
+            if index == 0:
+                # we are done
+                if x == y:
+                    break
+                # compute last flip
+                x,y = (lambda x,y : ((y,x) if ((len(self.s)-i) & 1) else (x,y)))(x,y)
+                break
+            # parity checks on last bits
+            rx = 1 & (int(index/2))
+            ry = 1 & (index ^ rx)
+            # input("rx:{} ry:{}".format(rx,ry))
+            if ry == 0:
+                if rx == 1:
+                    x,y = s-1 - x, s-1 - y
+                x,y = y,x
             x += s * rx
             y += s * ry
-            t = int(t/4)
-            s*=2
+            index = int(index/4)
+        #     input("x:{} y:{}".format(x,y))
+        #     input("index:{} s:{}".format(index,s))
+        # input("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
-    def rot(n:int, x:int, y:int ,rx:int, ry:int) -> tuple:
+    def transform(n:int, x:int, y:int ,rx:int) -> tuple:
         """
         rotate/flip a quadrant appropriately
         """
-        if ry == 0:
-            if rx == 1:
-                x = n-1 - x
-                y = n-1 - y
-            # Swap x and y
-            return y,x
-        return x,y
+        if rx == 1:
+            x,y = n-1 - x, n-1 - y
+        # Swap x and y
+        return y,x
