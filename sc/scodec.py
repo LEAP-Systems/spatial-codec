@@ -33,7 +33,7 @@ class SpatialCodec:
         # for 2D
         self.res = n**2
 
-        self.encode(128)
+        self.encode(10)
 
         # inputs = [self.encode(n**2, x) for x in range(n**2)]
         # self.visualizer.line(inputs)
@@ -70,6 +70,8 @@ class SpatialCodec:
         x,y = 0,0
         s = 1
         while s < self.res:
+            if index == 0 and x == y:
+                break
             # parity checks on last bits
             rx = 1 & (int(index/2))
             ry = 1 & (index ^ rx)
