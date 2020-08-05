@@ -67,10 +67,11 @@ class SpatialCodec:
         """
         x,y = 0,0
         for i,s in enumerate(self.s):
-            if x == y and index == 0:
-                break
             if index == 0:
-                # print(x,y)
+                # we are done
+                if x == y:
+                    break
+                # compute last flip
                 x,y = (lambda x,y : ((y,x) if ((len(self.s)-i) & 1) else (x,y)))(x,y)
                 break
             # parity checks on last bits
@@ -78,12 +79,14 @@ class SpatialCodec:
             ry = 1 & (index ^ rx)
             # input("rx:{} ry:{}".format(rx,ry))
             if ry == 0:
-                x,y = self.transform(s, x, y, rx)
+                if rx == 1:
+                    x,y = s-1 - x, s-1 - y
+                x,y = y,x
             x += s * rx
             y += s * ry
             index = int(index/4)
-            # input("x:{} y:{}".format(x,y))
-            # input("index:{} s:{}".format(index,s))
+        #     input("x:{} y:{}".format(x,y))
+        #     input("index:{} s:{}".format(index,s))
         # input("returning x:{} y:{}".format(x,y))
         return x,y
 
