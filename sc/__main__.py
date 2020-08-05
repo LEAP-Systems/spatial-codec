@@ -5,4 +5,4 @@ from sc.scodec import SpatialCodec
 
 sc = SpatialCodec(128,128)
 # sc.visualizer.populate(inputs)
-# sc.visualizer.render()
+sc.visualizer.render()
