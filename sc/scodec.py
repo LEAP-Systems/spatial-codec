@@ -16,7 +16,7 @@ Dependancies
 
 Copyright © 2020 Christian Sargusingh
 """
-
+import math
 from sc.visualizer import Visualizer
 
 class SpatialCodec:
@@ -33,7 +33,8 @@ class SpatialCodec:
         # for 2D
         self.res = n**2
         # self.encode(10)
-        inputs = [self.encode(x) for x in range(n**2)]
+        self.s = [2**x for x in range(int(math.sqrt(self.res)))]
+        inputs = [self.encode(x) for x in range(self.res)]
         self.visualizer.line(inputs)
 
 
@@ -67,8 +68,9 @@ class SpatialCodec:
         if index == 0:
             return 0,0
         x,y = 0,0
-        s = 1
-        while s < self.res:
+        # np.linspace(1,self.res,)
+        for s in self.s:
+            # print(s)
             if index == 0 and x == y:
                 break
             # parity checks on last bits
@@ -81,7 +83,6 @@ class SpatialCodec:
             y += s * ry
             # input("x:{} y:{}".format(x,y))
             index = int(index/4)
-            s *= 2
             # input("index:{} s:{}".format(index,s))
         # input("returning x:{} y:{}".format(x,y))
         return x,y
