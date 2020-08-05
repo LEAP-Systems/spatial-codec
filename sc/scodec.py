@@ -30,9 +30,13 @@ class SpatialCodec:
         self.iteration = 0
         self.scale = 1
         n = fx
+        # for 2D
+        self.res = n**2
 
-        inputs = [self.d2xy(n**2, x) for x in range(n**2)]
-        self.visualizer.line(inputs)
+        self.encode(128)
+
+        # inputs = [self.encode(n**2, x) for x in range(n**2)]
+        # self.visualizer.line(inputs)
 
 
     def sectorize(self, n=0):
@@ -43,7 +47,7 @@ class SpatialCodec:
         # s3 = ((0,self.ry-offset), (self.rx/2, self.ry-offset), (self.rx/2,self.ry/2-offset), (0, self.ry/2-offset))
         # s4 = ((0+offset,self.ry-offset), (self.rx/2+offset, self.ry-offset), (self.rx/2+offset,self.ry/2-offset), (0+offset, self.ry/2-offset))
 
-    def xy2d(self, n:int, x:int, y:int) -> int:
+    def decode(self, n:int, x:int, y:int) -> int:
         """
         convert (x,y) to d
         """
@@ -57,21 +61,27 @@ class SpatialCodec:
             s = int(s/2)
         return d
 
-    def d2xy(self, n:int, d:int) -> tuple:
+    def encode(self, index:int) -> tuple:
         """
         convert d to (x,y)
         """
-        t=d
+        if index == 0:
+            return 0,0
         x,y = 0,0
         s = 1
-        while s < n:
-            rx = 1 & (int(t/2))
-            ry = 1 & (t ^ rx)
+        while s < self.res:
+            # parity checks on last bits
+            rx = 1 & (int(index/2))
+            ry = 1 & (index ^ rx)
+            input("rx:{} ry:{}".format(rx,ry))
             x,y = self.rot(s, x, y, rx, ry)
             x += s * rx
             y += s * ry
-            t = int(t/4)
-            s*=2
+            input("x:{} y:{}".format(x,y))
+            index = int(index/4)
+            s *= 2
+            input("index:{} s:{}".format(index,s))
+        input("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
