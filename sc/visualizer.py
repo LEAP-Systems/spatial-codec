@@ -11,6 +11,7 @@ class Visualizer:
         # draw dividers
         # plt.plot([self.rx/2, self.rx/2], [0,self.ry],linewidth=1, linestyle='dashed', color='red')
         # plt.plot([0, self.rx], [self.ry/2,self.ry/2],linewidth=1, linestyle='dashed', color='red')
+        plt.plot([0, self.rx], [0,self.ry],linewidth=1, color='red')
         
     def render(self):
         plt.axis('off')

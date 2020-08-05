@@ -57,7 +57,7 @@ class SpatialCodec:
             ry = (y & s) > 0
             d += 2 * s * ((3 * rx) ^ ry)
             if ry == 0:
-                self.rot(n, x, y, rx)
+                self.transform(n, x, y, rx)
             s = int(s/2)
         return d
 
@@ -65,30 +65,30 @@ class SpatialCodec:
         """
         convert d to (x,y)
         """
-        if index == 0:
-            return 0,0
         x,y = 0,0
-        # np.linspace(1,self.res,)
-        for s in self.s:
-            # print(s)
-            if index == 0 and x == y:
+        for i,s in enumerate(self.s):
+            if x == y and index == 0:
+                break
+            if index == 0:
+                # print(x,y)
+                x,y = (lambda x,y : ((y,x) if ((len(self.s)-i) & 1) else (x,y)))(x,y)
                 break
             # parity checks on last bits
             rx = 1 & (int(index/2))
             ry = 1 & (index ^ rx)
             # input("rx:{} ry:{}".format(rx,ry))
             if ry == 0:
-                x,y = self.rot(s, x, y, rx)
+                x,y = self.transform(s, x, y, rx)
             x += s * rx
             y += s * ry
-            # input("x:{} y:{}".format(x,y))
             index = int(index/4)
+            # input("x:{} y:{}".format(x,y))
             # input("index:{} s:{}".format(index,s))
         # input("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
-    def rot(n:int, x:int, y:int ,rx:int) -> tuple:
+    def transform(n:int, x:int, y:int ,rx:int) -> tuple:
         """
         rotate/flip a quadrant appropriately
         """
