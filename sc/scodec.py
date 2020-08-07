@@ -33,7 +33,8 @@ class SpatialCodec:
         # for 2D
         self.res = n**2
         # self.encode(10)
-        self.s = [2**x for x in range(int(math.sqrt(self.res)))]
+        self.s = [2**x for x in range(n)]
+        print("s vector: {}".format(self.s))
         inputs = [self.encode(x) for x in range(self.res)]
         self.visualizer.line(inputs)
 
@@ -67,17 +68,19 @@ class SpatialCodec:
         """
         x,y = 0,0
         for i,s in enumerate(self.s):
+            # Once the index reaches 0 the x and y bits are latched and alternate between each other
+            # before converging before we exceed the range boundary n
             if index == 0:
                 # we are done
                 if x == y:
                     break
-                # compute last flip
+                # compute last flip (i required for forcasting)
                 x,y = (lambda x,y : ((y,x) if ((len(self.s)-i) & 1) else (x,y)))(x,y)
                 break
             # parity checks on last bits
-            rx = 1 & (int(index/2))
-            ry = 1 & (index ^ rx)
-            # input("rx:{} ry:{}".format(rx,ry))
+            rx = 1 & (int(index/2)) # is index/2 odd?
+            ry = 1 & (index ^ rx) # is rx = 1 on an odd index or rx = 0 on an even index?
+            input("rx:{} ry:{}".format(rx,ry))
             if ry == 0:
                 if rx == 1:
                     x,y = s-1 - x, s-1 - y
@@ -85,9 +88,9 @@ class SpatialCodec:
             x += s * rx
             y += s * ry
             index = int(index/4)
-        #     input("x:{} y:{}".format(x,y))
-        #     input("index:{} s:{}".format(index,s))
-        # input("returning x:{} y:{}".format(x,y))
+            input("x:{} y:{}".format(x,y))
+            input("index:{} s:{}".format(index,s))
+        input("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
