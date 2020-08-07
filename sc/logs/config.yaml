@@ -17,7 +17,7 @@ loggers:
 handlers:
   default_handler:
     class: 'logging.FileHandler'
-    filename: tcs/logs/root.log
+    filename: sc/logs/root.log
     level: 'DEBUG'
     formatter: default
   sc_handler:
