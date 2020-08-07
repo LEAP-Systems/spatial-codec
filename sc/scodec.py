@@ -96,10 +96,12 @@ class SpatialCodec:
             x += s * rx
             y += s * ry
             index = int(index/4)
-            self.log.debug("rx:%s ry:%s",rx,ry)
-            self.log.debug("x:%s y:%s", x,y)
-            self.log.debug("index:%s s:%s", index,s)
-        self.log.debug("returning x:{} y:{}".format(x,y))
+            if self.dev:
+                self.log.debug("rx:%s ry:%s",rx,ry)
+                self.log.debug("x:%s y:%s", x,y)
+                self.log.debug("index:%s s:%s", index,s)
+        if self.dev:
+            self.log.debug("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
