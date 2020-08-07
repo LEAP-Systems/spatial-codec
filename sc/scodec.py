@@ -11,37 +11,38 @@ Version: 1.0
 
 Take in an input set and generate a hilberts curve that will pass through each of the input points.
 
+https://www.desmos.com/calculator/hpzbeqkqc1
+
 Dependancies
 ------------
 
 Copyright © 2020 Christian Sargusingh
 """
+import logging.config
 import math
 from sc.visualizer import Visualizer
 
 class SpatialCodec:
-    def __init__(self, fx:int, fy:int, dev=False, optimize=True):
-        
+    def __init__(self, n:int, dev=False):
+        self.log = logging.getLogger(__name__)
         # env vars
         self.dev = dev
-        self.optimize = optimize
         
         # ensure input space can be filled
         # TODO: deprecate
-        if fx != fy or fx < 0 or fy < 0:
+        if n < 0 :
             raise ValueError
-        self.frame = (fx,fy)
+        self.frame = (n,n)
         self.visualizer = Visualizer(self.frame)
         self.iteration = 0
         self.scale = 1
-        
-        n = fx
+
         # for 2D
         self.res = n**2
         # self.encode(10)
         self.s = [2**x for x in range(n)]
-        print("s vector: {}".format(self.s))
-        inputs = [self.encode(x) for x in range(self.res**4)]
+        self.log.info("s vector: {}".format(self.s))
+        inputs = [self.encode(x) for x in range(self.res)]
         self.visualizer.line(inputs)
 
 
@@ -76,7 +77,7 @@ class SpatialCodec:
         for i,s in enumerate(self.s):
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
-            if self.optimize:
+            if not self.dev:
                 if index == 0:
                     # we are done
                     if x == y:
@@ -95,12 +96,10 @@ class SpatialCodec:
             x += s * rx
             y += s * ry
             index = int(index/4)
-            if self.dev:
-                input("rx:{} ry:{}".format(rx,ry))
-                input("x:{} y:{}".format(x,y))
-                input("index:{} s:{}".format(index,s))
-        if self.dev:
-            input("returning x:{} y:{}".format(x,y))
+            self.log.debug("rx:%s ry:%s",rx,ry)
+            self.log.debug("x:%s y:%s", x,y)
+            self.log.debug("index:%s s:%s", index,s)
+        self.log.debug("returning x:{} y:{}".format(x,y))
         return x,y
 
     @staticmethod
