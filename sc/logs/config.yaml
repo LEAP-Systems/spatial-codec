@@ -1,0 +1,31 @@
+# Spatial Codec Logging Configuration
+# -----------------------------------
+# Copyright © 2020 Christian Sargusingh. All Rights Reserved.
+
+version: 1
+disable_existing_loggers: True
+loggers:
+  # default logger for unregistered modules
+  '':
+    level: 'DEBUG'
+    handlers: ['default_handler']
+  sc.scodec:
+    level: 'DEBUG'
+    handlers: ['sc_handler']
+    propagate: no
+
+handlers:
+  default_handler:
+    class: 'logging.FileHandler'
+    filename: tcs/logs/root.log
+    level: 'DEBUG'
+    formatter: default
+  sc_handler:
+    class: 'logging.FileHandler'
+    level: 'DEBUG'
+    filename: sc/logs/sc.log
+    formatter: default
+
+formatters:
+  default:
+    format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s : %(message)s'
