@@ -49,15 +49,21 @@ class SpatialCodec:
         """
         convert (x,y) to d
         """
-        d=0
+        d = 0
         s = n >> 1
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
             d += 2 * s * ((3 * rx) ^ ry)
             if ry == 0:
-                self.transform(n, x, y, rx)
-            s = int(s/2)
+                if rx == 1:
+                    x,y = s-1 - x, s-1 - y
+                x,y = y,x
+            s = s >> 1
+            if self.dev:
+                self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
+        # if self.dev:
+        #     self.log.debug("returned x:%s y:%s @ iteration %s", x,y,index)
         return d
 
     def encode(self, i:int) -> tuple:
