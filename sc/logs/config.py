@@ -14,7 +14,7 @@ import yaml
 
 # cleanup all previous logs for new runtime environment
 cwd = os.getcwd()
-os.chdir(Path(__file__).parent.parent)
+os.chdir(Path(__file__).parent)
 
 logs = list(
     filter(lambda file : os.path.isfile(file) and file.split(".")[1] == "log", os.listdir())
