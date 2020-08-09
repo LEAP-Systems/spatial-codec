@@ -8,4 +8,4 @@ export SC_ENV=$2
 export FLASK_ENV=development
 
 # run in background
-python3 -m sc &
+nohup python3 -m sc &
