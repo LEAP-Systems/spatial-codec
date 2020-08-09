@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 class Visualizer:
 
     def __init__(self, frame:tuple):
-        # plt.figure(figsize=(8,8))
         self.rx, self.ry = frame
         # plt.axis([0, self.rx-1, 0, self.ry-1])
         # draw dividers
@@ -18,11 +17,11 @@ class Visualizer:
         plt.grid(b=False)
         plt.show()
     
-    def populate(self, targets:set):
-        plt.scatter(
-            list(map( lambda x : x[0], targets)),
-            list(map( lambda x : x[1], targets)),
-        )
+    # def populate(self, targets:set):
+    #     plt.scatter(
+    #         list(map( lambda x : x[0], targets)),
+    #         list(map( lambda x : x[1], targets)),
+    #     )
 
     def line(self, d:list):
         # creating 4 equivalent sectors
@@ -32,4 +31,4 @@ class Visualizer:
         x = list(map(lambda x : x[0], d))
         y = list(map(lambda x : x[1], d))
         plt.plot(x, y, linewidth=1, color='black')
-        plt.scatter(x,y)
+        # plt.scatter(x,y)
