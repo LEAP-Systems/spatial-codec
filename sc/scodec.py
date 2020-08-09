@@ -38,21 +38,12 @@ class SpatialCodec:
         self.scale = 1
 
         # for 2D
-        self.res = n**2
+        self.res = n
         # self.encode(10)
         self.s = [2**x for x in range(n)]
         self.log.info("s vector: {}".format(self.s))
         inputs = [self.encode(x) for x in range(self.res)]
         self.visualizer.line(inputs)
-
-
-    def sectorize(self, n=0):
-        pass
-        # s1 ((0,0),()
-        # s1 = ((0,self.ry), (self.rx/2, self.ry), (self.rx/2,self.ry/2), (0, self.ry/2))
-        # s2 = ((0+offset,self.ry), (self.rx/2+offset, self.ry), (self.rx/2+offset,self.ry/2), (0+offset, self.ry/2))
-        # s3 = ((0,self.ry-offset), (self.rx/2, self.ry-offset), (self.rx/2,self.ry/2-offset), (0, self.ry/2-offset))
-        # s4 = ((0+offset,self.ry-offset), (self.rx/2+offset, self.ry-offset), (self.rx/2+offset,self.ry/2-offset), (0+offset, self.ry/2-offset))
 
     def decode(self, n:int, x:int, y:int) -> int:
         """
@@ -69,25 +60,25 @@ class SpatialCodec:
             s = int(s/2)
         return d
 
-    def encode(self, index:int) -> tuple:
+    def encode(self, i:int) -> tuple:
         """
-        convert d to (x,y)
+        convert bit index to (x,y)
         """
         x,y = 0,0
-        for i,s in enumerate(self.s):
+        for index,s in enumerate(self.s):
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
-            if not self.dev:
-                if index == 0:
-                    # we are done
-                    if x == y:
-                        break
-                    # compute last flip (i required for forcasting)
-                    x,y = (lambda x,y : ((y,x) if ((len(self.s)-i) & 1) else (x,y)))(x,y)
+            if i == 0:
+                # we are done
+                if x == y:
                     break
+                # compute last flip (i required for forcasting)
+                x,y = (lambda x,y : ((y,x) if ((len(self.s)-index) & 1) else (x,y)))(x,y)
+                break
             # parity checks on last bits
-            rx = 1 & (int(index/2)) # is index/2 odd?
-            ry = 1 & (index ^ rx) # is rx = 1 on an odd index or rx = 0 on an even index?
+            rx = 1 & (i >> 1) # is index/2 odd?
+            ry = 1 & (i ^ rx) # is index/2 odd and index odd?
+                              # is index/2 even and index even?
             
             if ry == 0:
                 if rx == 1:
@@ -95,13 +86,11 @@ class SpatialCodec:
                 x,y = y,x
             x += s * rx
             y += s * ry
-            index = int(index/4)
+            i = int(i/4)
             if self.dev:
-                self.log.debug("rx:%s ry:%s",rx,ry)
-                self.log.debug("x:%s y:%s", x,y)
-                self.log.debug("index:%s s:%s", index,s)
+                self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         if self.dev:
-            self.log.debug("returning x:{} y:{}".format(x,y))
+            self.log.debug("returned x:%s y:%s @ iteration %s", x,y,index)
         return x,y
 
     @staticmethod
