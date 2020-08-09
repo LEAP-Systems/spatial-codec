@@ -50,7 +50,7 @@ class SpatialCodec:
         convert (x,y) to d
         """
         d=0
-        s = int(n/2)
+        s = n >> 1
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
@@ -86,7 +86,7 @@ class SpatialCodec:
                 x,y = y,x
             x += s * rx
             y += s * ry
-            i = int(i/4)
+            i = i >> 2
             if self.dev:
                 self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         if self.dev:
