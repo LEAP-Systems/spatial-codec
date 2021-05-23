@@ -7,7 +7,7 @@ disable_existing_loggers: True
 loggers:
   # default logger for unregistered modules
   '':
-    level: 'DEBUG'
+    level: 'INFO'
     handlers: ['console_handler']
   sc.scodec:
     level: 'DEBUG'
