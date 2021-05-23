@@ -5,16 +5,14 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 class Visualizer:
 
     @staticmethod
-    def plot_3d(coordinates:tuple) -> None:
+    def plot_3d(d:tuple) -> None:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        hcx, hcy, hcz, = list(), list(), list()
+        x = list(map(lambda x : x[0], d))
+        y = list(map(lambda x : x[1], d))
+        z = list(map(lambda x : x[2], d))
         # plot hilberts curve
-        for x,y,z in coordinates:
-            hcx.append(x)
-            hcy.append(y)
-            hcz.append(z)
-        plt.plot(hcx, hcy, hcz, marker='o')
+        plt.plot(x, y, z, marker='o')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
@@ -30,4 +28,8 @@ class Visualizer:
     def line(d:list) -> None:
         x = list(map(lambda x : x[0], d))
         y = list(map(lambda x : x[1], d))
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
         plt.plot(x, y, linewidth=1, color='black')
