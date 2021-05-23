@@ -21,20 +21,20 @@ import logging
 from sc.visualizer import Visualizer
 
 class SpatialCodec:
-    def __init__(self, n:int):
+    def __init__(self, resolution:int, dim:int):
         self.log = logging.getLogger(__name__)
         # ensure input space can be filled
         self.visualizer = Visualizer()
-        self.iteration = 0
-        self.scale = 1
-        # for 2D
-        self.res = n
-        self.s = [2**x for x in range(n)]
+        self.res = resolution
+        self.s = [2**x for x in range(self.res)]
         self.log.info("s vector: %s", self.s)
-        inputs = [self.encode(x) for x in range(self.res)]
-        # inputs = [self.encode3d(x) for x in range(self.res)]
-        # self.visualizer.plot_3d(inputs)
-        self.visualizer.line(inputs)
+        # dimension 
+        if dim == 2:
+            inputs = [self.encode(x) for x in range(self.res)]
+            self.visualizer.line(inputs)
+        elif dim == 3:
+            inputs = [self.encode3d(x) for x in range(self.res)]
+            self.visualizer.plot_3d(inputs)
 
     def decode(self, n:int, x:int, y:int) -> int:
         """
