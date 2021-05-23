@@ -5,9 +5,6 @@ from sc.scodec import SpatialCodec
 
 INPUT_SPACE = int(os.environ['SC_N'])
 
-if os.environ['SC_ENV'] == 'dev':
-    sc = SpatialCodec(INPUT_SPACE, dev=True)
-else:
-    sc = SpatialCodec(INPUT_SPACE, dev=False)
+sc = SpatialCodec(INPUT_SPACE)
 # sc.visualizer.populate(inputs)
 sc.visualizer.render()
