@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 """
 N2 Spatial Codec™
 =================
@@ -18,32 +17,23 @@ Dependancies
 
 Copyright © 2020 Christian Sargusingh
 """
-import logging.config
-import math
+import logging
 from sc.visualizer import Visualizer
 
 class SpatialCodec:
-    def __init__(self, n:int, dev=False):
+    def __init__(self, n:int):
         self.log = logging.getLogger(__name__)
-        # env vars
-        self.dev = dev
-        
         # ensure input space can be filled
-        # TODO: deprecate
-        if n < 0 :
-            raise ValueError
-        self.frame = (n,n)
-        self.visualizer = Visualizer(self.frame)
+        self.visualizer = Visualizer()
         self.iteration = 0
         self.scale = 1
-
         # for 2D
         self.res = n
-        # self.encode(10)
         self.s = [2**x for x in range(n)]
-        self.log.info("s vector: {}".format(self.s))
-        inputs = [self.encode(x) for x in range(self.res)]
-        self.visualizer.line(inputs)
+        self.log.info("s vector: %s", self.s)
+        # inputs = [self.encode(x) for x in range(self.res)]
+        inputs = [self.encode3d(x) for x in range(self.res)]
+        # self.visualizer.line(inputs)
 
     def decode(self, n:int, x:int, y:int) -> int:
         """
@@ -60,51 +50,65 @@ class SpatialCodec:
                     x,y = s-1 - x, s-1 - y
                 x,y = y,x
             s = s >> 1
-            if self.dev:
-                self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
-        # if self.dev:
-        #     self.log.debug("returned x:%s y:%s @ iteration %s", x,y,index)
+            self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         return d
 
-    def encode(self, i:int) -> tuple:
+    def encode3d(self, i:int) -> tuple:
         """
-        convert bit index to (x,y)
+        convert bit index to (x,y,z)
         """
-        x,y = 0,0
+        # initial coordinates
+        x,y,z = 0,0,0
         for index,s in enumerate(self.s):
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
             if i == 0:
                 # we are done
-                if x == y:
-                    break
+                if x == y: break
                 # compute last flip (i required for forcasting)
-                x,y = (lambda x,y : ((y,x) if ((len(self.s)-index) & 1) else (x,y)))(x,y)
+                x,y = (y,x) if (self.res-index) & 1 else (x,y)
                 break
             # parity checks on last bits
             rx = 1 & (i >> 1) # is index/2 odd?
             ry = 1 & (i ^ rx) # is index/2 odd and index odd?
                               # is index/2 even and index even?
-            
             if ry == 0:
-                if rx == 1:
-                    x,y = s-1 - x, s-1 - y
+                if rx == 1: x,y = s-1 - x, s-1 - y
                 x,y = y,x
             x += s * rx
             y += s * ry
             i = i >> 2
-            if self.dev:
-                self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
-        if self.dev:
-            self.log.debug("returned x:%s y:%s @ iteration %s", x,y,index)
+            self.log.debug("i:%s s:%s | rx:%s ry:%s | x:%s y:%s z:%s", i, s, rx, ry, x, y, z)
+        self.log.info("resolved i:%s -> x:%s y:%s z:%s", i, x,y,z)
+        return x,y,z
+
+    def encode(self, i:int) -> tuple:
+        """
+        convert bit index to (x,y)
+        """
+        # initial coordinates
+        x,y = 0,0
+        for index,s in enumerate(self.s):
+            self.log.debug("starting iteration %s",index)
+            # Once the index reaches 0 the x and y bits are latched and alternate between each other
+            # before converging before we exceed the range boundary n
+            if i == 0:
+                # we are done
+                if x == y: break
+                # compute last flip (i required for forcasting)
+                x,y = (y,x) if (self.res-index) & 1 else (x,y)
+                break
+            # parity checks on last bits
+            rx = 1 & (i >> 1) # is index/2 odd?
+            ry = 1 & (i ^ rx) # is index/2 odd and index odd?
+                              # is index/2 even and index even?
+            if ry == 0:
+                if rx == 1: x,y = s-1 - x, s-1 - y
+                x,y = y,x
+            x += s * rx
+            y += s * ry
+            i = i >> 2
+            self.log.debug("i:%s s:%s | rx:%s ry:%s -> x:%s y:%s", i, s, rx, ry, x, y)
+        self.log.info("resolved i:%s -> x:%s y:%s", i, x, y) 
         return x,y
 
-    @staticmethod
-    def transform(n:int, x:int, y:int ,rx:int) -> tuple:
-        """
-        rotate/flip a quadrant appropriately
-        """
-        if rx == 1:
-            x,y = n-1 - x, n-1 - y
-        # Swap x and y
-        return y,x
