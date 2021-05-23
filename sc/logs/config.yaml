@@ -10,7 +10,7 @@ loggers:
     level: 'INFO'
     handlers: ['console_handler']
   sc.scodec:
-    level: 'DEBUG'
+    level: 'INFO'
     handlers: ['console_handler']
     propagate: no
 
