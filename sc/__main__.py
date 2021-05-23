@@ -1,10 +1,21 @@
-import os
+import sys
+import getopt
+import logging
 from sc.scodec import SpatialCodec
 
-# inputs = ((10,3), (5,4), (2,6), (4,6), (1,9))
+def main(argv) -> None:
+    try:
+        opts, _ = getopt.getopt(argv, "r:d:", ["resolution=", "dimension="])
+    except getopt.GetoptError:
+        logging.exception("python -m sc -r $RESOLUTION -d $DIMENSION")
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-r", "--resolution"):
+            resolution = int(arg)
+        elif opt in ("-d", "--dimension"):
+            dimension = int(arg)
+    SpatialCodec(resolution, dimension)
 
-INPUT_SPACE = int(os.environ['SC_N'])
-
-sc = SpatialCodec(INPUT_SPACE)
-# sc.visualizer.populate(inputs)
-sc.visualizer.render()
+if __name__ == "__main__":
+    logger = logging.getLogger(__name__)
+    main(sys.argv[1:])
