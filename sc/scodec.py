@@ -65,24 +65,16 @@ class SpatialCodec:
             self.log.debug("starting iteration %s",index)
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
-            # if i == 0:
-            #     # optimization for starting case
-            #     if x == y == z: break
+            if i == 0:
+                # optimization for starting case, flipping does not do anything
+                if x == y == z: break
             #     # compute last flip (if odd flip if even keep)
             #     x,y,z = (y,x,z) if (self.res-index) & 1 else (x,y,z) 
             #     break
-            # parity checks on last bits
+            # compute region selector bits
             r_x = 1 & (i >> 2)  # is index/4 odd?
             r_y = 1 & (i >> 1 ^ r_x)
             r_z = 1 & (i ^ r_x ^ r_y)
-            # if r_z == 0:
-            #     if r_y == 0:
-            #         if r_x == 1: x,y,z = s-1 - x, s-1 - y, s-1 - z
-            #         # x,y,z = x,y,z
-            # else:
-            #    if r_y == 0:
-            #         if r_x == 1: x,y,z = s-1 - x, s-1 - y, s-1 - z
-            #         x,y,z = x,y,z
             # coordinates offsets by region
             x,y,z = self.transform(r_x,r_y,r_z,x,y,z,s)
             x += s * r_x
@@ -94,16 +86,35 @@ class SpatialCodec:
         return x,y,z
 
     def transform(self, r_x:int,r_y:int,r_z:int, x:int, y:int, z:int, s:int) -> Tuple[int,int,int]:
+        # region selection and transform application
+        # fn = s-1 - x, s-1 - y, s-1 - z 
+        # fn = x,y,z
+        # fn = x,z,y 
+        # fn = y,x,z 
+        # fn = y,z,x 
+        # fn = z,x,y 
+        # fn = z,y,x 
         if r_z == 0:
-            if r_y == 1:
-                if r_x == 1: x,y,z = s-1 - x, s-1 - y, s-1 - z
+            if r_y == 0:
+                if r_x == 1: x,y,z = z,s-1-y,s-1-x  # 0,0,1
+                else:x,y,z = z,y,x  # 0,0,0 (GOOD)
+            else:
+                if r_x == 1: x,y,z =  y,z,x # 0,1,1s (GOOD)
+                else: x,y,z = s-1-y,z,s-1-x # 0,1,0 (GOOD)
+        else:
+            if r_y == 0:
+                if r_x == 1: x,y,z = z,s-1-y,s-1-x # 1,0,1
+                else: x,y,z = z,x,y # 1,0,0 (GOOD)
+            else:
+                if r_x == 1: x,y,z = y,z,x # 1,1,1 (GOOD)
+                else:x,y,z = x,y,z # 1,1,0 (GOOD)
         return x,y,z
 
     def encode(self, i:int) -> tuple:
         """
         convert bit index to (x,y)
         |-----|-----|
-        |     |     |
+        |  1  |     |
         |-----|-----|
         |     |     |
         |-----|-----|
