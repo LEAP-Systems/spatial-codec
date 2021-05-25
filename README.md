@@ -2,7 +2,7 @@
 Modified: 2021-05
 
 <p align="center">
-  <img src="docs/img/Codec.gif" width="900" height="450"/>
+  <img src="docs/img/LEAP_INS_WHITE.png" width="900" height="450"/>
 </p>
 
 ## Navigation
