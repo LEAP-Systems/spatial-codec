@@ -31,4 +31,4 @@ handlers:
 
 formatters:
   default:
-    format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s : %(message)s'
+    format: '%(asctime)s - %(lineno)d - %(levelname)s : %(message)s'
