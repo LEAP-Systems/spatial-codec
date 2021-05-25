@@ -18,22 +18,24 @@ Dependancies
 Copyright © 2020 Christian Sargusingh
 """
 
-import logging
-from typing import Tuple
-from sc.visualizer import Visualizer
+import bitarray
+from typing import List, Tuple
 from sc.scodec import SpatialCodec
 
 class N2(SpatialCodec):
-    def __init__(self, resolution:int, dim:int):
-        self.log = logging.getLogger(__name__)
-        # ensure input space can be filled
-        
-        self.res = resolution
-        self.s = [2**x for x in range(self.res)]
-        self.log.info("s vector: %s", self.s)
-        # dimension 
-        inputs = [self.encode(x) for x in range(self.res)]
-        self.visualizer.line(inputs)
+
+    def __init__(self, resolution:int):
+        super().__init__(resolution=resolution)
+
+    def stream_encode(self, bytestream:bytes) -> None:
+        # encode by bits #TODO: encode by variable block sizes 
+        bitstream = bitarray.bitarray(endian="big")
+        bitstream.frombytes(bytestream)
+        self.log.debug(bitstream)
+        coor = [self.encode(i,b) for i,b in enumerate(bitstream)]
+        self.render(coor)
+
+    def stream_decode(self, coor:List[Tuple[int,int]]) -> bytes: ...
 
     def decode(self, n:int, x:int, y:int) -> int:
         """
@@ -53,32 +55,12 @@ class N2(SpatialCodec):
             self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         return d
 
-    def iterator(self, i:int) -> Tuple[int,int]:
-        """
-        Defines base iterator function for n2 spatial codec algorithm
-
-        :param i: [description]
-        :type i: int
-        :return: [description]
-        :rtype: Tuple[int,int]
-        """
-        r_x = 1 & (i >> 1)
-        r_y = 1 & (i ^ r_x)
-        return r_x, r_y
-
-    def encode(self, i:int) -> tuple:
-        """
-        convert bit index to (x,y)
-        |-----|-----|
-        |  1  |     |
-        |-----|-----|
-        |     |     |
-        |-----|-----|
-        """
+    def encode(self, i:int, b) -> Tuple[int,int]:
+        index = i
         self.log.info("Computing coordinate at bit: %s", i)
         # initial coordinates
         x,y = 0,0
-        for level, cells in enumerate(self.s):
+        for level, c in enumerate(self.s):
             self.log.info("starting level %s",level)
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
@@ -86,19 +68,54 @@ class N2(SpatialCodec):
                 # we are done
                 if x == y: break
                 # compute last flip (i required for forcasting)
-                x,y = (y,x) if (self.res-level) & 1 else (x,y)
+                x,y = (y,x) if (self.resolution-level) & 1 else (x,y)
                 break
-            # parity checks on last bits rx and ry can only be 1 or 0
-
-            # grid rotation function for this region
-            if r_y == 0:
-                if r_x == 1: x,y = cells-1 - x, cells-1 - y
-                x,y = y,x
-            # assign x and y to 
-            x += cells * r_x # x = x + (s or 0)
-            y += cells * r_y # y = y + (s or 0)
+            # generate base iterator 
+            r_x,r_y = self.iterator(i)
+            x,y = self.transform(x,y,r_x,r_y,c)
             i = i >> 2 # regions of seperation (4 verticies)
-            self.log.info("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, cells, r_x, r_y, x, y)
-        self.log.info("resolved i:%s -> x:%s y:%s", i, x, y) 
+            self.log.info("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
+        self.log.info("resolved i:%s -> x:%s y:%s", index, x, y) 
         return x,y
 
+    def transform(self, x:int, y:int, r_x:int, r_y:int, c:int) -> Tuple[int,int]:
+        """
+        Rotate and translate base iterator by cell selector c
+
+        :param x: computed x coordinate state @ cell iteration c
+        :type x: int
+        :param y: computed y coordinate state @ cell iteration c
+        :type y: int
+        :param r_x: [description]
+        :type r_x: int
+        :param r_y: [description]
+        :type r_y: int
+        :param s: cell index
+        :type s: int
+        :return: transformed coordinate tuple from cell c
+        :rtype: Tuple[int,int]
+        """
+        # rotation function for this region
+        if r_y == 0:
+            if r_x == 1: x,y = c-1 - x, c-1 - y
+            x,y = y,x
+        # translate base iterator
+        x += c * r_x # x = x + (s or 0)
+        y += c * r_y # y = y + (s or 0)
+        return x,y
+
+    def iterator(self, i:int) -> Tuple[int,int]:
+        """
+        Base iterator for N2 algorithm
+
+        :param i: probe index
+        :type i: int
+        :return: base cartesian coordinate of bit @ index i
+        :rtype: Tuple[int,int]
+        """
+        r_x = 1 & (i >> 1)
+        r_y = 1 & (i ^ r_x)
+        return r_x,r_y
+
+    def render(self, coor:List[Tuple[int,int]]) -> None:
+        self.visualizer.line(coor)
