@@ -8,6 +8,7 @@ from sc.scodec import SpatialCodec
 def main(argv) -> None:
     dimension = 0
     resolution = 0
+    stream = "default"
     try:
         opts, _ = getopt.getopt(argv, "r:d:", ["resolution=", "dimension="])
     except getopt.GetoptError:
@@ -15,7 +16,8 @@ def main(argv) -> None:
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-r", "--resolution"):
-            resolution = int(arg)
+            resolution = len(arg)
+            stream = arg 
         elif opt in ("-d", "--dimension"):
             dimension = int(arg)
     # N2/N3 impl split
@@ -25,7 +27,7 @@ def main(argv) -> None:
         sc = N3(resolution=resolution)
     else:
         raise ValueError("Spatial codec algorithm defined for 2D and 3D space filling curves")
-    sc.stream_encode(b'\xffffffff')
+    sc.stream_encode(bytes(stream, 'utf-8'))
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
