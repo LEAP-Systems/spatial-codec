@@ -32,8 +32,8 @@ class N2(SpatialCodec):
         bitstream = bitarray.bitarray(endian="big")
         bitstream.frombytes(bytestream)
         self.log.debug(bitstream)
-        coor = [self.encode(i,b) for i,b in enumerate(bitstream)]
-        self.render(coor)
+        coor =list(filter(None,[self.encode(i) if b else None for i,b in enumerate(bitstream)]))
+        self.render(coor,bitstream)
 
     def stream_decode(self, coor:List[Tuple[int,int]]) -> bytes: ...
 
@@ -55,7 +55,7 @@ class N2(SpatialCodec):
             self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         return d
 
-    def encode(self, i:int, b) -> Tuple[int,int]:
+    def encode(self, i:int) -> Tuple[int,int]:
         index = i
         self.log.info("Computing coordinate at bit: %s", i)
         # initial coordinates
@@ -117,5 +117,8 @@ class N2(SpatialCodec):
         r_y = 1 & (i ^ r_x)
         return r_x,r_y
 
-    def render(self, coor:List[Tuple[int,int]]) -> None:
-        self.visualizer.line(coor)
+    def render(self, coor:List[Tuple[int,int]], bitstream) -> None:
+        self.log.debug("coor: %s", coor)
+        base = [self.encode(i,1) for i,_ in enumerate(bitstream)]
+        self.log.debug("base: %s", base)
+        self.visualizer.d2(coor, base)
