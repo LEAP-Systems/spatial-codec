@@ -24,6 +24,8 @@ def main(argv) -> None:
     if dimension == 2:
         sc = N2(resolution=resolution)
     elif dimension == 3:
+        resolution = int(stream)
+        logging.info(resolution)
         sc = N3(resolution=resolution)
     else:
         raise ValueError("Spatial codec algorithm defined for 2D and 3D space filling curves")
