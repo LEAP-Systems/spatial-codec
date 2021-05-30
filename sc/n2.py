@@ -119,6 +119,6 @@ class N2(SpatialCodec):
 
     def render(self, coor:List[Tuple[int,int]], bitstream) -> None:
         self.log.debug("coor: %s", coor)
-        base = [self.encode(i,1) for i,_ in enumerate(bitstream)]
+        base = [self.encode(i) for i,_ in enumerate(bitstream)]
         self.log.debug("base: %s", base)
         self.visualizer.d2(coor, base)
