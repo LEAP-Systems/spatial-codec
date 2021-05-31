@@ -73,12 +73,24 @@ class N3(SpatialCodec):
             # (('-z','-y','-x'),'blueviolet'),
         ]
         self.log.info(len(variations))
+        # variation iterator
         for curve in variations:
             order, clr = curve
-            index = [self.iterator(i,order) for i in range(self.resolution)]
+            # bit iterator
+            li = []
+            for i in range(self.resolution):
+                x,y,z = 0,0,0
+                # region iterator
+                for index,s in enumerate(self.s):
+                    r_x,r_y,r_z = self.iterator(i,order)
+                    i = i >> 3
+                    x += s * r_x # x = x + (s | 0)
+                    y += s * r_y # y = y + (s | 0)
+                    z += s * r_z # z = z + (s | 0)
+                li.append((x,y,z))
             # self.render(index)
-            self.visualizer.add_curve(index, str(order),clr)
-            self.log.info("Added curve %s with label %s", index, str(order))
+            self.visualizer.add_curve(li, str(order),clr)
+            self.log.info("Added curve %s with label %s", li, str(order))
         self.visualizer.show()
         # index = [self.encode(i) for i in range(self.resolution)]
         # self.log.info(index)
@@ -116,6 +128,7 @@ class N3(SpatialCodec):
             #     break
             # compute region selector bits
             # coordinates offsets by region
+            # the iterator changes with different i values
             r_x,r_y,r_z = self.iterator(i, ('x','z','y'))
             # regions of seperation (8 verticies)
             i = i >> 3
@@ -127,16 +140,16 @@ class N3(SpatialCodec):
     def transform(self, r_x:int,r_y:int,r_z:int, x:int, y:int, z:int, s:int) -> Tuple[int,int,int]:
         # region selection and transform application
         # lambda x,y,z: (x + (s * r_x), y + (s * r_y), z + (s * r_z))
-        if (r_x,r_y,r_z) == (0,0,0):
-            x,y,z = y,x,z
-        elif (r_x,r_y,r_z) == (0,1,0) or (0,1,1):
-            x,y,z = z,y,x
-        elif (r_x,r_y,r_z) == (0,0,1) or (1,0,1):
-            x,y,z = x,-y,-z
-        elif (r_x,r_y,r_z) == (1,1,1) or (1,1,0):
-            x,y,z = -z,y,x
-        else:
-            x,y,z = -z,x,y
+        # if (r_x,r_y,r_z) == (0,0,0):
+        #     x,y,z = y,x,z
+        # elif (r_x,r_y,r_z) == (0,1,0) or (0,1,1):
+        #     x,y,z = z,y,x
+        # elif (r_x,r_y,r_z) == (0,0,1) or (1,0,1):
+        #     x,y,z = x,-y,-z
+        # elif (r_x,r_y,r_z) == (1,1,1) or (1,1,0):
+        #     x,y,z = -z,y,x
+        # else:
+        #     x,y,z = -z,x,y
         # translate base iterator
         x += s * r_x # x = x + (s | 0)
         y += s * r_y # y = y + (s | 0)
@@ -145,7 +158,7 @@ class N3(SpatialCodec):
 
     def iterator(self, i:int, o:Tuple[str,str,str]) -> Tuple[int,int,int]:
         """
-        Base iterator for N3 algorithm    
+        Base iterator for N3 algorithm
 
         :param i: probe index
         :type i: int
@@ -156,7 +169,7 @@ class N3(SpatialCodec):
         r_x = 1 & (i >> 2)
         r_y = 1 & (i >> 1 ^ r_x)
         r_z = 1 & (i ^ r_x ^ r_y)
-        # iterator variant selector
+        # iterator variant selector (-x and x are somehow the same?)
         if o[0] == 'x':
             if o[1] == 'y':
                 if o[2] == 'z': r_t = r_x, r_y, r_z
