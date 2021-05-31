@@ -28,7 +28,7 @@ class Visualizer:
             self.curves[index].set_visible(not self.curves[index].get_visible())
             plt.draw()
         # Make checkbuttons with all plotted lines with correct visibility
-        rax = plt.axes([0.05, 0.4, 0.1, 0.15])
+        rax = plt.axes([0.05, 0.1, 0.2, 0.7])
         labels = [str(curve.get_label()) for curve in self.curves]
         visibility = [bool(curve.get_visible()) for curve in self.curves]
         check = CheckButtons(rax, labels, visibility)
@@ -43,11 +43,7 @@ class Visualizer:
         check.on_clicked(func)
         plt.show()
 
-    @staticmethod
-    def plot_3d(d:List[Tuple[int,int,int]]) -> None:
-        plt.style.use('dark_background')
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+    def plot_3d(self, d:List[Tuple[int,int,int]]) -> None:
         x = list(map(lambda x : x[0], d))
         y = list(map(lambda x : x[1], d))
         z = list(map(lambda x : x[2], d))
@@ -59,10 +55,10 @@ class Visualizer:
         plt.autoscale(False)
         # plot hilberts curve
         plt.plot(x, y, z, marker='o', color='red')
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_zlim(0, cube_max)
+        self.ax.set_xlabel('X')
+        self.ax.set_ylabel('Y')
+        self.ax.set_zlabel('Z')
+        self.ax.set_zlim(0, cube_max)
         plt.show()
     
     @staticmethod
@@ -75,7 +71,7 @@ class Visualizer:
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         # Set the limits of the plot
-        sq_max = max(y) if max(y) > max(x) else max(x)
+        sq_max = max(max(x), max(y))
         plt.xlim(0, sq_max)
         plt.ylim(0, sq_max)
         # Don't mess with the limits!
