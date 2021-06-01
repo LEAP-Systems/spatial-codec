@@ -1,0 +1,21 @@
+---
+name: ci
+on:
+  push:
+    branch: master
+
+jobs:
+  lint:
+    name: flake8 lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: install lint dependancies
+        run: python3 -m pip install flake8
+      - name: flake8
+        run: flake8 sc
