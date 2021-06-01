@@ -5,8 +5,16 @@ N3 Spatial Codec
 Contributors: Christian Sargusingh
 Updated: 2021-05
 
+Encode an n1 block of data in n3 space using a pseudo hilbert space filling curve 
+
 Dependancies
 ------------
+```
+from typing import List, Tuple
+
+from sc.scodec import SpatialCodec
+from sc.iterators import Iterators
+```
 
 Copyright © 2020 Christian Sargusingh
 """
