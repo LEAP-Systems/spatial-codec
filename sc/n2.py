@@ -5,7 +5,7 @@ N2 Spatial Codec
 Contributors: Christian Sargusingh
 Updated: 2021-05
 
-Encode an n1 block of data in n2 space using a pseudo hilbert space filling curve 
+Encode an n1 block of data in n2 space using a pseudo hilbert space filling curve
 
 Dependancies
 ------------
@@ -19,6 +19,7 @@ Copyright © 2020 Christian Sargusingh
 from typing import List, Tuple
 from sc.scodec import SpatialCodec
 
+
 class N2(SpatialCodec):
 
     def __init__(self, resolution:int):
@@ -28,7 +29,7 @@ class N2(SpatialCodec):
         """
         Encode a stream of bytes in n2 space.
 
-        :param bytestream: 
+        :param bytestream: block of data for encoding
         :type bytestream: bytes
         :param mpl: flag to enable mpl visualizer, defaults to False
         :type mpl: bool, optional
@@ -61,7 +62,7 @@ class N2(SpatialCodec):
                     x,y = s-1 - x, s-1 - y
                 x,y = y,x
             s = s >> 1
-            self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
+            # self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         return d
 
     def encode(self, i:int) -> Tuple[int,int]:
@@ -88,21 +89,21 @@ class N2(SpatialCodec):
                 # compute last flip (i required for forcasting)
                 x,y = (y,x) if (self.resolution-level) & 1 else (x,y)
                 break
-            # generate base iterator 
+            # generate base iterator
             r_x,r_y = self.iterator(i)
             x,y = self.transform(x,y,r_x,r_y,c)
             i = i >> 2 # regions of seperation (4 verticies)
             self.log.debug("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
-        self.log.debug("resolved i:%s -> x:%s y:%s", index, x, y) 
+        self.log.debug("resolved i:%s -> x:%s y:%s", index, x, y)
         return x,y
 
     def transform(self, x:int, y:int, r_x:int, r_y:int, c:int) -> Tuple[int,int]:
         """
         Transform base iterator by applying a reflection about an axis or line by cell selector c
 
-        :param x: x translation to cell index c 
+        :param x: x translation to cell index c
         :type x: int
-        :param y: y translation to cell index c 
+        :param y: y translation to cell index c
         :type y: int
         :param r_x: x component of base iterator coordinate
         :type r_x: int
