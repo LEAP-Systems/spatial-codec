@@ -15,7 +15,6 @@ from typing import List, Tuple
 from sc.scodec import SpatialCodec
 from sc.iterators import Iterators
 ```
-
 Copyright © 2020 Christian Sargusingh
 """
 from typing import List, Tuple
