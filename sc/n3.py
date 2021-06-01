@@ -5,7 +5,7 @@ N3 Spatial Codec
 Contributors: Christian Sargusingh
 Updated: 2021-05
 
-Encode an n1 block of data in n3 space using a pseudo hilbert space filling curve 
+Encode an n1 block of data in n3 space using a pseudo hilbert space filling curve
 
 Dependancies
 ------------
@@ -22,10 +22,13 @@ from typing import List, Tuple
 from sc.scodec import SpatialCodec
 from sc.iterators import Iterators
 
+
 class N3(SpatialCodec):
+
     def __init__(self, resolution:int):
         if resolution > 8:
-            raise NotImplementedError('This version supports single iteration (max 8 bit resolution) curves in 3D space')
+            raise NotImplementedError("This version only supports single iteration\
+                (max 8 bit resolution) curves in 3D space")
         # spatial codec init
         super().__init__(resolution=resolution)
 
@@ -33,7 +36,7 @@ class N3(SpatialCodec):
         """
         Encode a stream of bytes in n3 space.
 
-        :param bytestream: 
+        :param bytestream: block of data for encoding
         :type bytestream: bytes
         :param mpl: flag to enable mpl visualizer, defaults to False
         :type mpl: bool, optional
@@ -49,7 +52,7 @@ class N3(SpatialCodec):
         stream = list(filter(None, [self.encode(i) if b else None for i,b in enumerate(bits)]))
         self.log.debug("stream: %s", stream)
         if mpl: self.render(stream)
-        return stream 
+        return stream
 
     def stream_decode(self, coor:List[Tuple[int,int,int]]) -> bytes: ...
 
@@ -96,7 +99,7 @@ class N3(SpatialCodec):
         :type r_y: int
         :param r_z: z component of iterator coordinate
         :type r_z: int
-        :param o: iterator variant selector 
+        :param o: iterator variant selector
         :type o: Tuple[str,str,str]
         :return: transformed coordinate tuple
         :rtype: Tuple[int,int,int]
@@ -106,10 +109,10 @@ class N3(SpatialCodec):
         if o[0] == 'x':
             if o[1] == 'y':
                 if o[2] == 'z': r_t = r_x, r_y, r_z
-                else: r_t = r_x, r_y, 1-r_z 
+                else: r_t = r_x, r_y, 1-r_z
             elif o[1] == '-y':
                 if o[2] == 'z': r_t = r_x, 1-r_y, r_z
-                else: r_t = r_x, 1-r_y, 1-r_z 
+                else: r_t = r_x, 1-r_y, 1-r_z
             elif o[1] == 'z':
                 if o[2] == 'y': r_t = r_x, r_z, r_y
                 else: r_t = r_x, r_z, 1-r_y
@@ -119,7 +122,7 @@ class N3(SpatialCodec):
         elif o[0] == '-x':
             if o[1] == 'y':
                 if o[2] == 'z': r_t = 1-r_x, r_y, r_z
-                else: r_t = 1-r_x, r_y, 1-r_z 
+                else: r_t = 1-r_x, r_y, 1-r_z
             elif o[1] == '-y':
                 if o[2] == 'z': r_t = 1-r_x, 1-r_y, r_z
                 else: r_t = 1-r_x, 1-r_y, 1-r_z
@@ -132,10 +135,10 @@ class N3(SpatialCodec):
         elif o[0] == 'y':
             if o[1] == 'x':
                 if o[2] == 'z': r_t = r_y, r_x, r_z
-                else: r_t = r_y, r_x, 1-r_z 
+                else: r_t = r_y, r_x, 1-r_z
             elif o[1] == '-x':
                 if o[2] == 'z': r_t = r_y, 1-r_x, r_z
-                else: r_t = r_y, 1-r_x, 1-r_z 
+                else: r_t = r_y, 1-r_x, 1-r_z
             elif o[1] == 'z':
                 if o[2] == 'x': r_t = r_y, r_z, r_x
                 else: r_t = r_y, r_z, 1-r_x
@@ -145,10 +148,10 @@ class N3(SpatialCodec):
         elif o[0] == '-y':
             if o[1] == 'x':
                 if o[2] == 'z': r_t = 1-r_y, r_x, r_z
-                else: r_t = 1-r_y, r_x, 1-r_z 
+                else: r_t = 1-r_y, r_x, 1-r_z
             elif o[1] == '-x':
                 if o[2] == 'z': r_t = 1-r_y, 1-r_x, r_z
-                else: r_t = 1-r_y, 1-r_x, 1-r_z 
+                else: r_t = 1-r_y, 1-r_x, 1-r_z
             elif o[1] == 'z':
                 if o[2] == 'x': r_t = 1-r_y, r_z, r_x
                 else: r_t = 1-r_y, r_z, 1-r_x
@@ -158,10 +161,10 @@ class N3(SpatialCodec):
         elif o[0] == 'z':
             if o[1] == 'x':
                 if o[2] == 'y': r_t = r_z, r_x, r_y
-                else: r_t = r_z, r_x, 1-r_y 
+                else: r_t = r_z, r_x, 1-r_y
             elif o[1] == '-x':
                 if o[2] == 'y': r_t = r_z, 1-r_x, r_y
-                else: r_t = r_z, 1-r_x, 1-r_y 
+                else: r_t = r_z, 1-r_x, 1-r_y
             elif o[1] == 'y':
                 if o[2] == 'x': r_t = r_z, r_y, r_x
                 else: r_t = r_z, r_y, 1-r_x
@@ -174,14 +177,14 @@ class N3(SpatialCodec):
                 else: r_t = 1-r_z, r_x, 1-r_y
             elif o[1] == '-x':
                 if o[2] == 'y': r_t = 1-r_z, 1-r_x, r_y
-                else: r_t = 1-r_z, 1-r_x, 1-r_y 
+                else: r_t = 1-r_z, 1-r_x, 1-r_y
             elif o[1] == 'y':
                 if o[2] == 'x': r_t = 1-r_z, r_y, r_x
                 else: r_t = 1-r_z, r_y, 1-r_x
             else:
                 if o[2] == 'x': r_t = 1-r_z, 1-r_y, r_x
                 else: r_t = 1-r_z, 1-r_y, 1-r_x
-        return r_t 
+        return r_t
 
     def render(self, stream:List[Tuple[int,int,int]]) -> None:
         """
