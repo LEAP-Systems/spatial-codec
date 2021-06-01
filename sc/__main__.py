@@ -10,25 +10,20 @@ def main(argv) -> None:
     resolution = 0
     stream = "default"
     try:
-        opts, _ = getopt.getopt(argv, "r:d:", ["resolution=", "dimension="])
+        opts, _ = getopt.getopt(argv, "s:d:", ["string=", "dimension="])
     except getopt.GetoptError:
-        logging.exception("python -m sc -r $RESOLUTION -d $DIMENSION")
+        logging.exception("python -m sc -s $STRING -d $DIMENSION")
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ("-r", "--resolution"):
+        if opt in ("-s", "--string"):
             resolution = len(arg)
-            stream = arg 
+            stream = arg
         elif opt in ("-d", "--dimension"):
             dimension = int(arg)
     # N2/N3 impl split
-    if dimension == 2:
-        sc = N2(resolution=resolution)
-    elif dimension == 3:
-        resolution = int(stream)
-        logging.info(resolution)
-        sc = N3(resolution=resolution)
-    else:
-        raise ValueError("Spatial codec algorithm defined for 2D and 3D space filling curves")
+    if dimension == 2: sc = N2(resolution)
+    elif dimension == 3: sc = N3(resolution)
+    else: raise ValueError("Spatial codec is only defined for 2D and 3D space filling curves")
     sc.stream_encode(bytes(stream, 'utf-8'))
 
 if __name__ == "__main__":
