@@ -23,17 +23,17 @@ class N3(SpatialCodec):
         # spatial codec init
         super().__init__(resolution=resolution)
 
-    def stream_encode(self, bytestream:bytes) -> None:
+    def stream_encode(self, bytestream:bytes, mpl:bool=False) -> List[Tuple[int,int,int]]:
         # remove excess bytes if word exceeds an 8 bit number
         bitstream = int(bytestream.hex(), base=16) & 0xff
         self.log.debug("bitstream: %s", bin(bitstream))
         # stretch bistream into iterable of single bits
-        bits = [bitstream >> i for i in range(start=1,stop=9)]
+        bits = [bitstream >> i & 0x1 for i in range(self.resolution)]
         # generate index by encoding each set bit sequentially
-        index = list(filter(None, [self.encode(i) if b else None for i,b in enumerate(bits)]))
-        self.log.info(index)
-        base = [self.encode(i) for i,_ in enumerate(bits)]
-        self.render(index, base)
+        stream = list(filter(None, [self.encode(i) if b else None for i,b in enumerate(bits)]))
+        self.log.debug("stream: %s", stream)
+        if mpl: self.render(stream)
+        return stream 
 
     def stream_decode(self, coor:List[Tuple[int,int,int]]) -> bytes: ...
 
@@ -44,8 +44,9 @@ class N3(SpatialCodec):
         # variation iterator
         for curve in Iterators.variations:
             order, clr = curve
-            self.visualizer.add_curve(
+            self.visualizer.add_n3_curve(
                 d=[self.transform(*self.iterator(i), order) for i in range(8)],
+                marker='o',
                 label=str(order),
                 clr=clr
             )
@@ -204,8 +205,9 @@ class N3(SpatialCodec):
                 else: r_t = 1-r_z, 1-r_y, 1-r_x
         return r_t 
 
-    def render(self, index:List[Tuple[int,int,int]], base:List[Tuple[int,int,int]]) -> None:
+    def render(self, stream:List[Tuple[int,int,int]]) -> None:
+        index = [self.encode(i) for i in range(self.resolution)]
         self.log.debug("index: %s", index)
-        self.log.debug("base: %s", base)
-        self.visualizer.add_curve(index, label='index', clr='r')
-        self.visualizer.add_curve(base, label='base', clr='k')
+        self.log.debug("stream: %s", stream)
+        self.visualizer.add_n3_curve(index, marker='', label='index', clr='k')
+        self.visualizer.add_n3_curve(stream, marker='o', label='stream', clr='k')
