@@ -6,7 +6,7 @@ from matplotlib.widgets import CheckButtons
 class Visualizer:
 
     def __init__(self) -> None:
-        # plt.style.use('dark_background')
+        plt.style.use('dark_background')
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.curves = []
