@@ -1,5 +1,6 @@
 # Spatial Codec
 [![ci](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml)
+
 Modified: 2021-05
 
 <p align="center">
