@@ -18,7 +18,6 @@ Dependancies
 Copyright © 2020 Christian Sargusingh
 """
 
-import bitarray
 from typing import List, Tuple
 from sc.scodec import SpatialCodec
 
@@ -27,13 +26,16 @@ class N2(SpatialCodec):
     def __init__(self, resolution:int):
         super().__init__(resolution=resolution)
 
-    def stream_encode(self, bytestream:bytes) -> None:
-        # encode by bits #TODO: encode by variable block sizes 
-        bitstream = bitarray.bitarray(endian="big")
-        bitstream.frombytes(bytestream)
-        self.log.debug(bitstream)
-        coor =list(filter(None,[self.encode(i) if b else None for i,b in enumerate(bitstream)]))
-        self.render(coor,bitstream)
+    def stream_encode(self, bytestream:bytes, mpl:bool=False) -> List[Tuple[int,int]]:
+        # remove excess bytes if word exceeds resolution
+        bitstream = int(bytestream.hex(), base=16) & (2**self.resolution - 1)
+        self.log.debug("bitstream: %s", bin(bitstream))
+        bits = [bitstream >> i & 0x1 for i in range(self.resolution)]
+        self.log.debug("%s",bits )
+        index =list(filter(None,[self.encode(i) if b else None for i,b in enumerate(bits)]))
+        self.log.debug("index: %s", index)
+        if mpl: self.render(index)
+        return index
 
     def stream_decode(self, coor:List[Tuple[int,int]]) -> bytes: ...
 
@@ -57,11 +59,11 @@ class N2(SpatialCodec):
 
     def encode(self, i:int) -> Tuple[int,int]:
         index = i
-        self.log.info("Computing coordinate at bit: %s", i)
+        self.log.debug("Computing coordinate at bit: %s", i)
         # initial coordinates
         x,y = 0,0
         for level, c in enumerate(self.s):
-            self.log.info("starting level %s",level)
+            self.log.debug("starting level %s",level)
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
             if i == 0:
@@ -74,8 +76,8 @@ class N2(SpatialCodec):
             r_x,r_y = self.iterator(i)
             x,y = self.transform(x,y,r_x,r_y,c)
             i = i >> 2 # regions of seperation (4 verticies)
-            self.log.info("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
-        self.log.info("resolved i:%s -> x:%s y:%s", index, x, y) 
+            self.log.debug("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
+        self.log.debug("resolved i:%s -> x:%s y:%s", index, x, y) 
         return x,y
 
     def transform(self, x:int, y:int, r_x:int, r_y:int, c:int) -> Tuple[int,int]:
@@ -117,8 +119,10 @@ class N2(SpatialCodec):
         r_y = 1 & (i ^ r_x)
         return r_x,r_y
 
-    def render(self, coor:List[Tuple[int,int]], bitstream) -> None:
-        self.log.debug("coor: %s", coor)
-        base = [self.encode(i) for i,_ in enumerate(bitstream)]
-        self.log.debug("base: %s", base)
-        self.visualizer.d2(coor, base)
+    def render(self, stream:List[Tuple[int,int]]) -> None:
+        index = [self.encode(i) for i in range(self.resolution)]
+        self.log.debug("index: %s", index)
+        self.log.debug("stream: %s", stream)
+        self.visualizer.add_n2_curve(index, marker='', label='index', clr='k')
+        self.visualizer.add_n2_curve(stream, marker='o', label='stream', clr='r')
+        self.visualizer.show()
