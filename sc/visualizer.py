@@ -1,8 +1,29 @@
-import numpy as np
+# -*- coding: utf-8 -*-
+"""
+Visualizer
+==========
+Contributors: Christian Sargusingh
+Updated: 2021-05
+
+Interactive spatial codec rendering using mpl api.
+
+Dependancies
+------------
+```
+from typing import List, Tuple
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.widgets import CheckButtons
+```
+Copyright © 2020 Christian Sargusingh
+"""
+
 from typing import List, Tuple
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from matplotlib.widgets import CheckButtons
+
+
 class Visualizer:
 
     def __init__(self) -> None:
