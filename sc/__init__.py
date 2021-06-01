@@ -8,4 +8,6 @@ Copyright © 2020 LEAP. All Rights Reserved.
 """
 
 # execute logger config
-from sc.logs import config
+from sc.logs.config import config
+
+config()
