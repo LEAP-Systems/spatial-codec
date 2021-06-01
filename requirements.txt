@@ -1,5 +1,5 @@
 Cython
-bitarray
 matplotlib
 numpy
 PyYaml
+flake8
