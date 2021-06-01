@@ -1,9 +1,10 @@
-from sc.n3 import N3
-from sc.n2 import N2
 import sys
 import getopt
 import logging
-from sc.scodec import SpatialCodec
+
+from sc.n3 import N3
+from sc.n2 import N2
+
 
 def main(argv) -> None:
     # defaults
@@ -34,6 +35,7 @@ def main(argv) -> None:
     elif dimension == 3: sc = N3(resolution)
     else: raise ValueError("Spatial codec is only defined for 2D and 3D space filling curves")
     sc.stream_encode(stream,mpl=mpl)
+
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
