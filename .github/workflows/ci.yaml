@@ -2,7 +2,12 @@
 name: ci
 on:
   push:
-    branch: master
+    branch:
+      - master
+  pull_request:
+    type: [opened, re-opened, synchronized]
+    branches:
+      - master
 
 jobs:
   lint:
