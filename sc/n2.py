@@ -1,39 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-N2 Spatial Codec™
-=================
+N2 Spatial Codec
+================
 Contributors: Christian Sargusingh
-Updated: 2020-07
-Repoitory: https://github.com/cSDes1gn/spatial-codec
-README availble in repository root
-Version: 1.0
+Updated: 2021-05
 
-Take in an input set and generate a hilberts curve that will pass through each of the input points.
-
-https://www.desmos.com/calculator/hpzbeqkqc1
+Encode an n1 block of data in n2 space using a pseudo hilbert space filling curve
 
 Dependancies
 ------------
-
+```
+from typing import List, Tuple
+from sc.scodec import SpatialCodec
+```
 Copyright © 2020 Christian Sargusingh
 """
 
-import bitarray
 from typing import List, Tuple
 from sc.scodec import SpatialCodec
+
 
 class N2(SpatialCodec):
 
     def __init__(self, resolution:int):
         super().__init__(resolution=resolution)
 
-    def stream_encode(self, bytestream:bytes) -> None:
-        # encode by bits #TODO: encode by variable block sizes 
-        bitstream = bitarray.bitarray(endian="big")
-        bitstream.frombytes(bytestream)
-        self.log.debug(bitstream)
-        coor =list(filter(None,[self.encode(i) if b else None for i,b in enumerate(bitstream)]))
-        self.render(coor,bitstream)
+    def stream_encode(self, bytestream:bytes, mpl:bool=False) -> List[Tuple[int,int]]:
+        """
+        Encode a stream of bytes in n2 space.
+
+        :param bytestream: block of data for encoding
+        :type bytestream: bytes
+        :param mpl: flag to enable mpl visualizer, defaults to False
+        :type mpl: bool, optional
+        :return: encoded stream
+        :rtype: List[Tuple[int,int]]
+        """
+        # remove excess bytes if word exceeds resolution
+        bitstream = int(bytestream.hex(), base=16) & (2**self.resolution - 1)
+        self.log.debug("bitstream: %s", bin(bitstream))
+        bits = [bitstream >> i & 0x1 for i in range(self.resolution)]
+        index =list(filter(None,[self.encode(i) if b else None for i,b in enumerate(bits)]))
+        self.log.debug("index: %s", index)
+        if mpl: self.render(index)
+        return index
 
     def stream_decode(self, coor:List[Tuple[int,int]]) -> bytes: ...
 
@@ -52,16 +62,25 @@ class N2(SpatialCodec):
                     x,y = s-1 - x, s-1 - y
                 x,y = y,x
             s = s >> 1
-            self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
+            # self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
         return d
 
     def encode(self, i:int) -> Tuple[int,int]:
+        """
+        Compute coordinate tuple of an n2 hilbert curve at index i. This applies
+        iterative mapping to n2 space to constuct hilberts curve @ resolution
+
+        :param i: bit index
+        :type i: int
+        :return: coordinate tuple @ bit index i
+        :rtype: Tuple[int,int]
+        """
         index = i
-        self.log.info("Computing coordinate at bit: %s", i)
+        self.log.debug("Computing coordinate at bit: %s", i)
         # initial coordinates
         x,y = 0,0
         for level, c in enumerate(self.s):
-            self.log.info("starting level %s",level)
+            self.log.debug("starting level %s",level)
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
             if i == 0:
@@ -70,25 +89,25 @@ class N2(SpatialCodec):
                 # compute last flip (i required for forcasting)
                 x,y = (y,x) if (self.resolution-level) & 1 else (x,y)
                 break
-            # generate base iterator 
+            # generate base iterator
             r_x,r_y = self.iterator(i)
             x,y = self.transform(x,y,r_x,r_y,c)
             i = i >> 2 # regions of seperation (4 verticies)
-            self.log.info("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
-        self.log.info("resolved i:%s -> x:%s y:%s", index, x, y) 
+            self.log.debug("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
+        self.log.debug("resolved i:%s -> x:%s y:%s", index, x, y)
         return x,y
 
     def transform(self, x:int, y:int, r_x:int, r_y:int, c:int) -> Tuple[int,int]:
         """
-        Rotate and translate base iterator by cell selector c
+        Transform base iterator by applying a reflection about an axis or line by cell selector c
 
-        :param x: computed x coordinate state @ cell iteration c
+        :param x: x translation to cell index c
         :type x: int
-        :param y: computed y coordinate state @ cell iteration c
+        :param y: y translation to cell index c
         :type y: int
-        :param r_x: [description]
+        :param r_x: x component of base iterator coordinate
         :type r_x: int
-        :param r_y: [description]
+        :param r_y: y component of base iterator coordinate
         :type r_y: int
         :param s: cell index
         :type s: int
@@ -117,8 +136,16 @@ class N2(SpatialCodec):
         r_y = 1 & (i ^ r_x)
         return r_x,r_y
 
-    def render(self, coor:List[Tuple[int,int]], bitstream) -> None:
-        self.log.debug("coor: %s", coor)
-        base = [self.encode(i) for i,_ in enumerate(bitstream)]
-        self.log.debug("base: %s", base)
-        self.visualizer.d2(coor, base)
+    def render(self, stream:List[Tuple[int,int]]) -> None:
+        """
+        Render MPL visualizer of index iterator and stream overlay
+
+        :param stream: encoded stream
+        :type stream: List[Tuple[int,int]]
+        """
+        index = [self.encode(i) for i in range(self.resolution)]
+        self.log.debug("index: %s", index)
+        self.log.debug("stream: %s", stream)
+        self.visualizer.add_n2_curve(index, marker='', label='index', clr='k')
+        self.visualizer.add_n2_curve(stream, marker='o', label='stream', clr='r')
+        self.visualizer.show()

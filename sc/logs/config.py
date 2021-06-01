@@ -12,23 +12,25 @@ from pathlib import Path
 
 import yaml
 
-# cleanup all previous logs for new runtime environment
-cwd = os.getcwd()
-os.chdir(Path(__file__).parent)
 
-logs = list(
-    filter(lambda file : os.path.isfile(file) and file.split(".")[1] == "log", os.listdir())
-)
-for log in logs:
-    os.remove(log)
-os.chdir(cwd)
+def config():
+    # cleanup all previous logs for new runtime environment
+    cwd = os.getcwd()
+    os.chdir(Path(__file__).parent)
 
-CONFIG_PATH = Path(__file__).parent.joinpath("config.yaml")
+    logs = list(
+        filter(lambda file : os.path.isfile(file) and file.split(".")[1] == "log", os.listdir())
+    )
+    for log in logs:
+        os.remove(log)
+    os.chdir(cwd)
 
-# check for existance of config.yaml
-if not CONFIG_PATH.exists():
-    raise FileNotFoundError
+    CONFIG_PATH = Path(__file__).parent.joinpath("config.yaml")
 
-# configure the logger
-with open(CONFIG_PATH) as file:
-    logging.config.dictConfig(yaml.full_load(file))
+    # check for existance of config.yaml
+    if not CONFIG_PATH.exists():
+        raise FileNotFoundError
+
+    # configure the logger
+    with open(CONFIG_PATH) as file:
+        logging.config.dictConfig(yaml.full_load(file))
