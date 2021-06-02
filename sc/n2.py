@@ -63,7 +63,7 @@ class N2(SpatialCodec):
             ry = (y & s) > 0
             self.log.debug("rx: %s,ry:%s",rx,ry)
             d += s ** 2 * ((3 * rx) ^ ry)
-            x,y = self.transform(x,y,rx,ry,n)
+            # x,y = self.transform(x,y,rx,ry,n)
             s = s >> 1 # divide by 2 each iteration
         self.log.debug("d: %s x: %s y: %s", d,x,y)
         index = 0x1 << d
