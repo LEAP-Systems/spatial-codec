@@ -34,7 +34,9 @@ def main(argv) -> None:
     if dimension == 2: sc = N2(resolution)
     elif dimension == 3: sc = N3(resolution)
     else: raise ValueError("Spatial codec is only defined for 2D and 3D space filling curves")
-    sc.stream_encode(stream,mpl=mpl)
+    stream = sc.stream_encode(stream,mpl=mpl)
+    bytestream = sc.stream_decode(stream)
+    print(bytestream.decode('utf-8'))
 
 
 if __name__ == "__main__":
