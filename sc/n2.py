@@ -45,25 +45,30 @@ class N2(SpatialCodec):
         if mpl: self.render(index)
         return index
 
-    def stream_decode(self, coor:List[Tuple[int,int]]) -> bytes: ...
+    def stream_decode(self, stream:List[Tuple[int,int]]) -> bytes:
+        bitstream = 0x0
+        for coor in stream:
+            bitstream |= self.decode(self.resolution, coor[0], coor[1])
+        self.log.debug("decoded bitstream: %s", bin(bitstream))
+        bytestream = bitstream.to_bytes(2,byteorder='big', signed=False)
+        self.log.debug("bytestream: %s", bytestream)
+        return bytestream
 
     def decode(self, n:int, x:int, y:int) -> int:
-        """
-        convert (x,y) to d
-        """
         d = 0
         s = n >> 1
+        self.log.debug("n: %s x: %s y: %s", n,x,y)
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
-            d += 2 * s * ((3 * rx) ^ ry)
-            if ry == 0:
-                if rx == 1:
-                    x,y = s-1 - x, s-1 - y
-                x,y = y,x
-            s = s >> 1
-            # self.log.debug("i:%s s:%s \t|\trx:%s ry:%s\t|\tx:%s y:%s", i, s, rx, ry, x, y)
-        return d
+            self.log.debug("rx: %s,ry:%s",rx,ry)
+            d += s ** 2 * ((3 * rx) ^ ry)
+            x,y = self.transform(x,y,rx,ry,n)
+            s = s >> 1 # divide by 2 each iteration
+        self.log.debug("d: %s x: %s y: %s", d,x,y)
+        index = 0x1 << d
+        self.log.debug("computed index: %s", bin(index))
+        return index
 
     def encode(self, i:int) -> Tuple[int,int]:
         """
@@ -80,7 +85,6 @@ class N2(SpatialCodec):
         # initial coordinates
         x,y = 0,0
         for level, c in enumerate(self.s):
-            self.log.debug("starting level %s",level)
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
             if i == 0:
@@ -92,6 +96,9 @@ class N2(SpatialCodec):
             # generate base iterator
             r_x,r_y = self.iterator(i)
             x,y = self.transform(x,y,r_x,r_y,c)
+            # translate base iterator
+            x += c * r_x # x = x + (s or 0)
+            y += c * r_y # y = y + (s or 0)
             i = i >> 2 # regions of seperation (4 verticies)
             self.log.debug("i:%s cells:%s | i/2 odd:%s i/2 odd and i odd:%s -> x:%s y:%s", i, c, r_x, r_y, x, y)
         self.log.debug("resolved i:%s -> x:%s y:%s", index, x, y)
@@ -118,9 +125,6 @@ class N2(SpatialCodec):
         if r_y == 0:
             if r_x == 1: x,y = c-1 - x, c-1 - y
             x,y = y,x
-        # translate base iterator
-        x += c * r_x # x = x + (s or 0)
-        y += c * r_y # y = y + (s or 0)
         return x,y
 
     def iterator(self, i:int) -> Tuple[int,int]:
