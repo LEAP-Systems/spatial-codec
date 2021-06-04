@@ -1,14 +1,19 @@
-
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 int xy2d(int n, int x, int y);
 void d2xy(int n, int d, int *x, int *y);
 void rot(int n, int *x, int *y, int rx, int ry);
 
-int main(void) {
+int main(int argc, char** argv) {
     int bit;
-    bit = xy2d(8, 0, 0);
+    uint8_t x = atoi(argv[1]);
+    uint8_t y = atoi(argv[2]);
+    printf("Computing n2 hilberts curve @ x: %d y: %d\n", x, y);
+    bit = xy2d(64, x, y);
     printf("%d\n", bit);
+    return 0;
 }
 
 // convert (x,y) to d
@@ -18,6 +23,7 @@ int xy2d(int n, int x, int y) {
         rx = (x & s) > 0;
         ry = (y & s) > 0;
         d += s * s * ((3 * rx) ^ ry);
+        printf("iteration s: %d\trx: %d\try: %d\td: %d\n", s, rx, ry, d);
         rot(n, &x, &y, rx, ry);
     }
     return d;
