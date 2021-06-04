@@ -1,4 +1,5 @@
-plotly>=4.4.1
-bitarray>=1.1.0
-matplotlib>=3.1.1
+Cython
+matplotlib
 numpy
+PyYaml
+flake8
