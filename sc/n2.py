@@ -45,17 +45,36 @@ class N2(SpatialCodec):
         if mpl: self.render(index)
         return index
 
-    def stream_decode(self, stream:List[Tuple[int,int]], byte_size:int) -> bytes:
+    def stream_decode(self, stream:List[Tuple[int,int]], block:int) -> bytes:
+        """
+        Decode a stream of coordinates encoded in n2 space into bytes.
+
+        :param stream: stream of n2 space coordinate mapping
+        :type stream: List[Tuple[int,int]]
+        :param block: byte block size
+        :type block: int
+        :return: decoded bytestream
+        :rtype: bytes
+        """
         bitstream = 0x0
-        self.log.debug("Expected byte size: %s", byte_size)
+        self.log.debug("Expected byte size: %s", block)
         for coor in stream:
             bitstream |= self.decode(coor)
         self.log.debug("decoded bitstream: %s", bin(bitstream))
-        bytestream = bitstream.to_bytes(byte_size,byteorder='big', signed=False)
+        bytestream = bitstream.to_bytes(block,byteorder='big', signed=False)
         self.log.debug("bytestream: %s", bytestream)
         return bytestream
 
     def decode(self, coor:Tuple[int,int]) -> int:
+        """
+        Compute bit index from a coordinate tuple encoded from an n2 hilbert curve.
+        This method iteratively applies the inverse operation of the n2 space encoding.
+
+        :param coor: n2 space coordinate mapping
+        :type coor: Tuple[int,int]
+        :return: bit index of coor
+        :rtype: int
+        """
         d = 0
         s = self.resolution >> 1
         x,y = coor
