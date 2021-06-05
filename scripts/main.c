@@ -1,3 +1,7 @@
+/*
+ * https://en.wikipedia.org/wiki/Hilbert_curve
+**/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -24,7 +28,7 @@ int xy2d(int n, int x, int y) {
         ry = (y & s) > 0;
         d += s * s * ((3 * rx) ^ ry);
         rot(n, &x, &y, rx, ry);
-        printf("iteration s: %d\trx: %d\try: %d\td: %d\tx: %d\ty: %d\n", s, rx, ry, d, x, y);
+        printf("s:%d\trx:%d\try:%d\td:%d\tx:%d\ty:%d\n", s, rx, ry, d, x, y);
     }
     return d;
 }
