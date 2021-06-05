@@ -54,9 +54,12 @@ class N3(SpatialCodec):
         if mpl: self.render(stream)
         return stream
 
-    def stream_decode(self, coor:List[Tuple[int,int,int]]) -> bytes: ...
+    def stream_decode(self, stream:List[Tuple[int,int,int]], byte_size:int) -> bytes: ...
 
-    def decode(self, n:int, x:int, y:int) -> int: ...
+    def decode(self, n:int, coor:Tuple[int,int,int]) -> int:
+        d = 0
+        x,y,z = coor
+        return d
 
     def encode(self, i:int) -> Tuple[int,int,int]:
         """

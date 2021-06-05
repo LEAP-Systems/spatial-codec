@@ -45,18 +45,20 @@ class N2(SpatialCodec):
         if mpl: self.render(index)
         return index
 
-    def stream_decode(self, stream:List[Tuple[int,int]]) -> bytes:
+    def stream_decode(self, stream:List[Tuple[int,int]], byte_size:int) -> bytes:
         bitstream = 0x0
+        self.log.debug("Expected byte size: %s", byte_size)
         for coor in stream:
-            bitstream |= self.decode(self.resolution, coor[0], coor[1])
+            bitstream |= self.decode(self.resolution, coor)
         self.log.debug("decoded bitstream: %s", bin(bitstream))
-        bytestream = bitstream.to_bytes(2,byteorder='big', signed=False)
+        bytestream = bitstream.to_bytes(byte_size,byteorder='big', signed=False)
         self.log.debug("bytestream: %s", bytestream)
         return bytestream
 
-    def decode(self, n:int, x:int, y:int) -> int:
+    def decode(self, n:int, coor:Tuple[int,int]) -> int:
         d = 0
         s = n >> 1
+        x,y = coor
         self.log.debug("n: %s x: %s y: %s", n,x,y)
         while s > 0:
             rx = (x & s) > 0
