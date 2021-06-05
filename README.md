@@ -1,5 +1,6 @@
 # Spatial Codec
 [![ci](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Modified: 2021-05
 
@@ -14,7 +15,7 @@ Modified: 2021-05
   4. [License](#license)
 
 ## About
-Spatial codec is a spatial encoding and decoding algorithm developed for mapping a bytes to a 3D matrix at a target voxel resolution. The algorithm maps according to [Hilbert's Space Filling Curve](https://en.wikipedia.org/wiki/Hilbert_curve) which preserves the relative localization of bits in 3D independant of the matrix dimension which is a convienient property for error correction and scalable network policies.
+Spatial codec is a spatial encoding and decoding algorithm developed for iteratively mapping any number of bytes to a 3D (N3 space) matrix. The algorithm uses a psuedo variant of [Hilbert's Space Filling Curve](https://en.wikipedia.org/wiki/Hilbert_curve) which preserves the relative localization of bits in 3D independant of the matrix dimension which is a convienient property for error correction and scalable network policies.
 
 ## Quickstart
 Install python dependancies
