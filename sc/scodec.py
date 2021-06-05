@@ -29,7 +29,7 @@ class SpatialCodec(ABC):
     def __init__(self, resolution:int) -> None:
         self.log = logging.getLogger(__name__)
         # compute codec resolution (next power of 2)
-        self.resolution = 2 ** math.ceil(math.log2(resolution))
+        self.resolution = 4 ** math.ceil(math.log(resolution,4))
         self.log.info("Codec resolution: %s", self.resolution)
         self.s = [2**x for x in range(self.resolution)]
         self.log.info("s vector: %s", self.s)
