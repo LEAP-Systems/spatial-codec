@@ -61,14 +61,14 @@ class N2(SpatialCodec):
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
-            self.log.debug("rx: %s,ry:%s",rx,ry)
             d += s ** 2 * ((3 * rx) ^ ry)
-            # x,y = self.transform(x,y,rx,ry,n)
+            x,y = self.transform(x,y,rx,ry,n)
+            self.log.debug("s: %s rx: %s ry:%s x:%s y:%s",s,rx,ry,x,y)
             s = s >> 1 # divide by 2 each iteration
         self.log.debug("d: %s x: %s y: %s", d,x,y)
         index = 0x1 << d
         self.log.debug("computed index: %s", bin(index))
-        return index
+        return index 
 
     def encode(self, i:int) -> Tuple[int,int]:
         """
