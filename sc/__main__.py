@@ -39,7 +39,7 @@ def main(argv) -> None:
     elif dimension == 3:
         n3_sc = N3(resolution)
         encode_stream = n3_sc.stream_encode(input_stream,mpl=mpl)
-        # bytestream = n3_sc.stream_decode(encode_stream,len(input_stream))
+        bytestream = n3_sc.stream_decode(encode_stream,len(input_stream))
     else:
         raise ValueError("Spatial codec is only defined for 2D and 3D space filling curves")
     print(bytestream.decode('utf-8'))

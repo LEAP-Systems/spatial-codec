@@ -20,7 +20,6 @@ Copyright © 2020 Christian Sargusingh
 from typing import List, Tuple
 
 from sc.scodec import SpatialCodec
-from sc.iterators import Iterators
 
 
 class N3(SpatialCodec):
@@ -54,12 +53,32 @@ class N3(SpatialCodec):
         if mpl: self.render(stream)
         return stream
 
-    def stream_decode(self, stream:List[Tuple[int,int,int]], byte_size:int) -> bytes: ...
+    def stream_decode(self, stream:List[Tuple[int,int,int]], block:int=8) -> bytes:
+        bitstream = 0x0
+        self.log.debug("Expected byte size: %s", block)
+        for coor in stream:
+            bitstream |= self.decode(coor)
+        self.log.debug("decoded bitstream: %s", bin(bitstream))
+        bytestream = bitstream.to_bytes(block,byteorder='big', signed=False)
+        self.log.debug("bytestream: %s", bytestream)
+        return bytestream
 
-    def decode(self, n:int, coor:Tuple[int,int,int]) -> int:
+    def decode(self, coor:Tuple[int,int,int]) -> int:
         d = 0
+        s = self.resolution >> 1
         x,y,z = coor
-        return d
+        self.log.debug("n: %s x: %s y: %s z: %s", self.resolution,x,y,z)
+        while s > 0:
+            rx = (x & s) > 0
+            ry = (y & s) > 0
+            rz = (z & s) > 0
+            d += s ** 2 * ((ry ^ 3 * rx) ^ ry)
+            self.log.debug("s: %s rx: %s ry:%s rz: %s x:%s y:%s",s,rx,ry,rz,x,y)
+            s = s >> 1 # divide by 2 each iteration
+        self.log.debug("d: %s x: %s y: %s", d,x,y)
+        index = 0x1 << d
+        self.log.debug("computed index: %s", bin(index))
+        return index
 
     def encode(self, i:int) -> Tuple[int,int,int]:
         """
@@ -208,12 +227,12 @@ class N3(SpatialCodec):
         Interactive visualizer for iteration variations
         """
         # variation iterator
-        for curve in Iterators.variations:
-            order, clr = curve
-            self.visualizer.add_n3_curve(
-                d=[self.transform(*self.iterator(i), order) for i in range(8)],
-                marker='o',
-                label=str(order),
-                clr=clr
-            )
-        self.visualizer.show()
+        # for curve in Iterators.variations:
+        #     order, clr = curve
+        #     self.visualizer.add_n3_curve(
+        #         d=[self.transform(*self.iterator(i), order) for i in range(8)],
+        #         marker='o',
+        #         label=str(order),
+        #         clr=clr
+        #     )
+        # self.visualizer.show()
