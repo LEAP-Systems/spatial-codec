@@ -19,7 +19,7 @@ def config():
     os.chdir(Path(__file__).parent)
 
     logs = list(
-        filter(lambda file : os.path.isfile(file) and file.split(".")[1] == "log", os.listdir())
+        filter(lambda file: os.path.isfile(file) and file.split(".")[1] == "log", os.listdir())
     )
     for log in logs:
         os.remove(log)
