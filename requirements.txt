@@ -3,4 +3,4 @@ matplotlib
 numpy
 PyYaml
 flake8
-black
+autopep8
