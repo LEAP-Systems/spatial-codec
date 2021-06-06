@@ -51,8 +51,7 @@ class N3(SpatialCodec):
         # generate index by encoding each set bit sequentially
         stream = list(filter(None, [self.encode(i) if b else None for i, b in enumerate(bits)]))
         self.log.debug("stream: %s", stream)
-        if mpl:
-            self.render(stream)
+        if mpl: self.render(stream)
         return stream
 
     def stream_decode(self, stream: List[Tuple[int, int, int]], block: int = 8) -> bytes:
