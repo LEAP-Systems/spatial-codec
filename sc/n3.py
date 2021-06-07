@@ -17,20 +17,33 @@ from sc.iterators import Iterators
 ```
 Copyright © 2020 Christian Sargusingh
 """
+import math
 from typing import List, Tuple
 
 from sc.scodec import SpatialCodec
 
 
 class N3(SpatialCodec):
-    def __init__(self, resolution: int):
-        if resolution > 8:
+
+    BASE_BLOCK_SIZE = 8   # block size of base iterator
+
+    def __init__(self, block_size: int):
+        # check if the block_size is greater than the base block size
+        if block_size > self.BASE_BLOCK_SIZE:
             raise NotImplementedError(
                 "This version only supports single iteration\
-                (max 8 bit resolution) curves in 3D space"
+                (max 8 bit block_size) curves in 3D space"
             )
+        # validate block size
+        if not math.log(block_size, self.BASE_BLOCK_SIZE).is_integer():
+            raise ValueError("{} block size must be a power of {}".format(
+                __name__, self.BASE_BLOCK_SIZE))
+        self.block_size = block_size
+        self._sv = [self.BASE_BLOCK_SIZE**x for x in range(block_size)]
+        self.log.info("s vector: %s", self._sv)
         # spatial codec init
-        super().__init__(resolution=resolution)
+        super().__init__()
+        self.log.info("Configured %s codec with block size: %s", __name__, self.block_size)
 
     def stream_encode(self, bytestream: bytes, mpl: bool = False) -> List[Tuple[int, int, int]]:
         """
@@ -47,7 +60,7 @@ class N3(SpatialCodec):
         bitstream = int(bytestream.hex(), base=16) & 0xFF
         self.log.debug("bitstream: %s", bin(bitstream))
         # stretch bistream into iterable of single bits
-        bits = [bitstream >> i & 0x1 for i in range(self.resolution)]
+        bits = [bitstream >> i & 0x1 for i in range(self.block_size)]
         # generate index by encoding each set bit sequentially
         stream = list(filter(None, [self.encode(i) if b else None for i, b in enumerate(bits)]))
         self.log.debug("stream: %s", stream)
@@ -66,9 +79,9 @@ class N3(SpatialCodec):
 
     def decode(self, coor: Tuple[int, int, int]) -> int:
         d = 0
-        s = self.resolution >> 1
+        s = self.block_size >> 1
         x, y, z = coor
-        self.log.debug("n: %s x: %s y: %s z: %s", self.resolution, x, y, z)
+        self.log.debug("n: %s x: %s y: %s z: %s", self.block_size, x, y, z)
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
@@ -84,9 +97,9 @@ class N3(SpatialCodec):
     def encode(self, i: int) -> Tuple[int, int, int]:
         """
         Compute coordinate tuple of an n3 hilbert curve at index i. Normally this
-        applies iterative mapping to n3 space to constuct hilberts curve @ resolution
+        applies iterative mapping to n3 space to constuct hilberts curve @ block_size
         (the iterative solution is not supported therefore the encode function only
-        supports the base resolution: 8)
+        supports the base block_size: 8)
 
         :param i: bit index
         :type i: int
@@ -266,7 +279,7 @@ class N3(SpatialCodec):
         :param stream: encoded stream
         :type stream: List[Tuple[int,int,int]]
         """
-        index = [self.encode(i) for i in range(self.resolution)]
+        index = [self.encode(i) for i in range(self.block_size)]
         self.log.debug("index: %s", index)
         self.log.debug("stream: %s", stream)
         self.visualizer.add_n3_curve(index, marker="", label="index", clr="k")
