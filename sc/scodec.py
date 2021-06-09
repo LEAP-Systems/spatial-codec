@@ -25,15 +25,18 @@ from sc.visualizer import Visualizer
 
 
 class SpatialCodec(ABC):
-    def __init__(self, resolution: int) -> None:
+    def __init__(self, block_size: int, base_block_size: int) -> None:
         self.log = logging.getLogger(__name__)
         # compute codec resolution (next power of 2)
-        self.resolution = 4 ** math.ceil(math.log(resolution, 4))
-        self.log.info("Codec resolution: %s", self.resolution)
-        self.s = [2 ** x for x in range(self.resolution)]
-        self.log.info("s vector: %s", self.s)
         self.visualizer = Visualizer()
         super().__init__()
+        # validate block size
+        if not math.log(block_size, base_block_size).is_integer():
+            raise ValueError("{} block size must be a power of {}".format(
+                __name__, base_block_size))
+        self.block_size = block_size
+        self._sv = [2**x for x in range(block_size)]
+        self.log.info("s vector: %s", self._sv)
 
     @abstractmethod
     def stream_encode(self, bytestream: bytes) -> None:
