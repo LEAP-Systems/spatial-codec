@@ -21,8 +21,12 @@ from sc.scodec import SpatialCodec
 
 
 class N2(SpatialCodec):
-    def __init__(self, resolution: int):
-        super().__init__(resolution=resolution)
+
+    BASE_BLOCK_SIZE = 4   # block size of base iterator
+
+    def __init__(self, block_size: int):
+        super().__init__(block_size, self.BASE_BLOCK_SIZE)
+        self.log.info("Configured %s codec with block size: %s", __name__, self.block_size)
 
     def stream_encode(self, bytestream: bytes, mpl: bool = False) -> List[Tuple[int, int]]:
         """
@@ -36,13 +40,12 @@ class N2(SpatialCodec):
         :rtype: List[Tuple[int,int]]
         """
         # remove excess bytes if word exceeds resolution
-        bitstream = int(bytestream.hex(), base=16) & (2 ** self.resolution - 1)
+        bitstream = int(bytestream.hex(), base=16) & (2 ** self.block_size - 1)
         self.log.debug("bitstream: %s", bin(bitstream))
-        bits = [bitstream >> i & 0x1 for i in range(self.resolution)]
+        bits = [bitstream >> i & 0x1 for i in range(self.block_size)]
         index = list(filter(None, [self.encode(i) if b else None for i, b in enumerate(bits)]))
         self.log.debug("index: %s", index)
-        if mpl:
-            self.render(index)
+        if mpl: self.render(index)
         return index
 
     def stream_decode(self, stream: List[Tuple[int, int]], block: int) -> bytes:
@@ -76,14 +79,14 @@ class N2(SpatialCodec):
         :rtype: int
         """
         d = 0
-        s = self.resolution >> 1
+        s = self.block_size >> 1
         x, y = coor
-        self.log.debug("n: %s x: %s y: %s", self.resolution, x, y)
+        self.log.debug("n: %s x: %s y: %s", self.block_size, x, y)
         while s > 0:
             rx = (x & s) > 0
             ry = (y & s) > 0
             d += s ** 2 * ((3 * rx) ^ ry)
-            x, y = self.transform(x, y, rx, ry, self.resolution)
+            x, y = self.transform(x, y, rx, ry, self.block_size)
             self.log.debug("s: %s rx: %s ry:%s x:%s y:%s", s, rx, ry, x, y)
             s = s >> 1  # divide by 2 each iteration
         self.log.debug("d: %s x: %s y: %s", d, x, y)
@@ -105,7 +108,7 @@ class N2(SpatialCodec):
         self.log.debug("Computing coordinate at bit: %s", i)
         # initial coordinates
         x, y = 0, 0
-        for level, c in enumerate(self.s):
+        for level, c in enumerate(self._sv):
             # Once the index reaches 0 the x and y bits are latched and alternate between each other
             # before converging before we exceed the range boundary n
             if i == 0:
@@ -113,7 +116,7 @@ class N2(SpatialCodec):
                 if x == y:
                     break
                 # compute last flip (i required for forcasting)
-                x, y = (y, x) if (self.resolution - level) & 1 else (x, y)
+                x, y = (y, x) if (self.block_size - level) & 1 else (x, y)
                 break
             # generate base iterator
             r_x, r_y = self.iterator(i)
@@ -178,7 +181,7 @@ class N2(SpatialCodec):
         :param stream: encoded stream
         :type stream: List[Tuple[int,int]]
         """
-        index = [self.encode(i) for i in range(self.resolution)]
+        index = [self.encode(i) for i in range(self.block_size)]
         self.log.debug("index: %s", index)
         self.log.debug("stream: %s", stream)
         self.visualizer.add_n2_curve(index, marker="", label="index", clr="k")

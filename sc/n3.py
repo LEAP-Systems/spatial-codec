@@ -17,7 +17,7 @@ from sc.iterators import Iterators
 ```
 Copyright © 2020 Christian Sargusingh
 """
-import math
+
 from typing import List, Tuple
 
 from sc.scodec import SpatialCodec
@@ -34,15 +34,7 @@ class N3(SpatialCodec):
                 "This version only supports single iteration\
                 (max 8 bit block_size) curves in 3D space"
             )
-        # validate block size
-        if not math.log(block_size, self.BASE_BLOCK_SIZE).is_integer():
-            raise ValueError("{} block size must be a power of {}".format(
-                __name__, self.BASE_BLOCK_SIZE))
-        self.block_size = block_size
-        self._sv = [self.BASE_BLOCK_SIZE**x for x in range(block_size)]
-        self.log.info("s vector: %s", self._sv)
-        # spatial codec init
-        super().__init__()
+        super().__init__(block_size, self.BASE_BLOCK_SIZE)
         self.log.info("Configured %s codec with block size: %s", __name__, self.block_size)
 
     def stream_encode(self, bytestream: bytes, mpl: bool = False) -> List[Tuple[int, int, int]]:
