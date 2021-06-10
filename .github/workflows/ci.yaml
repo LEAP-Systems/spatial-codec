@@ -2,10 +2,10 @@
 name: ci
 on:
   push:
-    branch:
+    branches:
       - master
   pull_request:
-    type: [opened, re-opened, synchronized]
+    types: [opened, reopened, synchronize]
     branches:
       - master
 
@@ -33,4 +33,4 @@ jobs:
       - name: install scodec
         run: |
           python3 -m pip install .
-          python3 -c "import scodec; print(scodec.__version__)"
+          python3 -c "import scodec; print("Success on version: {}".format(scodec.__version__))"
