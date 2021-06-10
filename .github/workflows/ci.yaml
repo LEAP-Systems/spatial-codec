@@ -31,4 +31,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: install scodec
-        run: python3 -m pip install .
+        run: |
+          python3 -m pip install .
+          python3 -c "import scodec; print(scodec.__version__)"
