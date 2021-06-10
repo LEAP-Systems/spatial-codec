@@ -2,5 +2,3 @@ Cython
 matplotlib
 numpy
 PyYaml
-flake8
-autopep8
