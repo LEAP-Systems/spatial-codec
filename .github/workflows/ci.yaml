@@ -2,6 +2,11 @@
 name: ci
 on:
   push:
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "scripts/**"
+      - "ref/**"
     branches:
       - master
   pull_request:
