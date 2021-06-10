@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.widgets import CheckButtons
 ```
-Copyright © 2020 Christian Sargusingh
+Copyright © 2021 LEAP. All Rights Reserved.
 """
 
 from typing import List, Tuple

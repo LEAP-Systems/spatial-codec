@@ -12,16 +12,16 @@ import math
 import logging
 from typing import List, Tuple
 from abc import ABC, abstractmethod
-from sc.visualizer import Visualizer
+from codec.visualizer import Visualizer
 ```
-Copyright © 2020 Christian Sargusingh
+Copyright © 2021 LEAP. All Rights Reserved.
 """
 
 import math
 import logging
 from typing import List, Tuple
 from abc import ABC, abstractmethod
-from sc.visualizer import Visualizer
+from codec.visualizer import Visualizer
 
 
 class SpatialCodec(ABC):

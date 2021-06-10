@@ -4,7 +4,7 @@
 Spatial Codec Logging Configuration
 ===================================
 
-Copyright © 2020 Christian Sargusingh. All Rights Reserved.
+Copyright © 2021 LEAP. All Rights Reserved.
 """
 import logging.config
 import os

@@ -2,8 +2,7 @@
 """
 N3 Spatial Codec
 ================
-Contributors: Christian Sargusingh
-Updated: 2021-05
+Updated: 2021-06
 
 Encode an n1 block of data in n3 space using a pseudo hilbert space filling curve
 
@@ -12,15 +11,14 @@ Dependancies
 ```
 from typing import List, Tuple
 
-from sc.scodec import SpatialCodec
-from sc.iterators import Iterators
+from codec.scodec import SpatialCodec
 ```
-Copyright © 2020 Christian Sargusingh
+Copyright © 2021 LEAP. All Rights Reserved.
 """
 
 from typing import List, Tuple
 
-from sc.scodec import SpatialCodec
+from codec.scodec import SpatialCodec
 
 
 class N3(SpatialCodec):
