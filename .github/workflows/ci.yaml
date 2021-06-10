@@ -24,3 +24,11 @@ jobs:
         run: python3 -m pip install flake8
       - name: flake8
         run: flake8 scodec 
+  pip:
+    name: python package install
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install scodec
+        run: python3 -m pip install .
