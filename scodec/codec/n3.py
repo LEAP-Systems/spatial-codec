@@ -55,23 +55,20 @@ class N3(SpatialCodec):
         if mpl: self.render(stream)
         return stream
 
-    def stream_decode(self, stream: List[Tuple[int, int, int]], block: int = 8) -> bytes:
+    def stream_decode(self, stream: List[Tuple[int, int, int]]) -> bytes:
         """
         Decode a stream of coordinates encoded in n3 space into bytes.
 
         :param stream: stream of n3 space coordinate mapping
         :type stream: List[Tuple[int, int, int]]
-        :param block: byte block size, defaults to 8
-        :type block: int, optional
         :return: decoded bytestream
         :rtype: bytes
         """
         bitstream = 0x0
-        self.log.debug("Expected byte size: %s", block)
         for coor in stream:
             bitstream |= self.decode(coor)
         self.log.info("decoded bitstream: %s", bin(bitstream))
-        bytestream = bitstream.to_bytes(block, byteorder="big", signed=False)
+        bytestream = bitstream.to_bytes(self.block_size, byteorder="big", signed=False)
         self.log.info("bytestream: %s", bytestream)
         return bytestream
 
