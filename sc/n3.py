@@ -31,7 +31,7 @@ class N3(SpatialCodec):
         # check if the block_size is greater than the base block size
         if block_size > self.BASE_BLOCK_SIZE:
             raise NotImplementedError(
-                "This version only supports single iteration\
+                "This version only supports first order\
                 (max 8 bit block_size) curves in 3D space"
             )
         super().__init__(block_size, self.BASE_BLOCK_SIZE)
@@ -51,7 +51,7 @@ class N3(SpatialCodec):
         # remove excess bytes if word exceeds an 8 bit number
         bitstream = int(bytestream.hex(), base=16) & 0xFF
         self.log.debug("bitstream: %s", bin(bitstream))
-        # stretch bistream into iterable of single bits
+        # unpacked bistream into iterable of single bits
         bits = [bitstream >> i & 0x1 for i in range(self.block_size)]
         # generate index by encoding each set bit sequentially
         stream = list(filter(None, [self.encode(i) if b else None for i, b in enumerate(bits)]))
@@ -60,6 +60,16 @@ class N3(SpatialCodec):
         return stream
 
     def stream_decode(self, stream: List[Tuple[int, int, int]], block: int = 8) -> bytes:
+        """
+        Decode a stream of coordinates encoded in n3 space into bytes.
+
+        :param stream: stream of n3 space coordinate mapping
+        :type stream: List[Tuple[int, int, int]]
+        :param block: byte block size, defaults to 8
+        :type block: int, optional
+        :return: decoded bytestream
+        :rtype: bytes
+        """
         bitstream = 0x0
         self.log.debug("Expected byte size: %s", block)
         for coor in stream:
@@ -70,18 +80,18 @@ class N3(SpatialCodec):
         return bytestream
 
     def decode(self, coor: Tuple[int, int, int]) -> int:
-        d = 0
-        s = self.block_size >> 1
+        """
+        Compute bit index from a coordinate tuple encoded from an n3 first order hilbert curve.
+        This method simply computes the
+
+        :param coor: n3 space coordinate mapping
+        :type coor: Tuple[int, int, int]
+        :return: bit index of coordinate
+        :rtype: int
+        """
         x, y, z = coor
-        self.log.debug("n: %s x: %s y: %s z: %s", self.block_size, x, y, z)
-        while s > 0:
-            rx = (x & s) > 0
-            ry = (y & s) > 0
-            rz = (z & s) > 0
-            d += s ** 2 * ((ry ^ 3 * rx) ^ ry)
-            self.log.debug("s: %s rx: %s ry:%s rz: %s x:%s y:%s", s, rx, ry, rz, x, y)
-            s = s >> 1  # divide by 2 each iteration
-        self.log.debug("d: %s x: %s y: %s", d, x, y)
+        x, y, z = 1 & x, 1 & y, 1 & z
+        d = (x << 2) ^ (x ^ y << 1) ^ (x ^ y ^ z)
         index = 0x1 << d
         self.log.debug("computed index: %s", bin(index))
         return index
