@@ -12,7 +12,7 @@ import math
 import logging
 from typing import List, Tuple
 from abc import ABC, abstractmethod
-from codec.visualizer import Visualizer
+from scodec.plt.visualizer import Visualizer
 ```
 Copyright © 2021 LEAP. All Rights Reserved.
 """
@@ -21,7 +21,7 @@ import math
 import logging
 from typing import List, Tuple
 from abc import ABC, abstractmethod
-from codec.visualizer import Visualizer
+from scodec.plt.visualizer import Visualizer
 
 
 class SpatialCodec(ABC):
@@ -36,7 +36,7 @@ class SpatialCodec(ABC):
                 __name__, base_block_size))
         self.block_size = block_size
         self._sv = [2**x for x in range(block_size)]
-        self.log.info("s vector: %s", self._sv)
+        self.log.debug("s vector: %s", self._sv)
 
     @abstractmethod
     def stream_encode(self, bytestream: bytes) -> None:

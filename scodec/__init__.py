@@ -8,6 +8,6 @@ Copyright © 2021 LEAP. All Rights Reserved.
 """
 
 # execute logger config
-from codec.logs.config import config
+from scodec.logs.config import config
 
 config()
