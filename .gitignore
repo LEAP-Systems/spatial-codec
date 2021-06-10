@@ -1,3 +1,6 @@
 __pycache__
 *.log
 *.out
+*.eggs
+*.egg-info
+build

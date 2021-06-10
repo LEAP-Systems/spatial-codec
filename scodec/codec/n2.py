@@ -10,13 +10,13 @@ Dependancies
 ------------
 ```
 from typing import List, Tuple
-from codec.scodec import SpatialCodec
+from scodec.codec.base import SpatialCodec
 ```
 Copyright © 2021 LEAP. All Rights Reserved.
 """
 
 from typing import List, Tuple
-from codec.scodec import SpatialCodec
+from scodec.codec.base import SpatialCodec
 
 
 class N2(SpatialCodec):
@@ -43,7 +43,7 @@ class N2(SpatialCodec):
         self.log.debug("bitstream: %s", bin(bitstream))
         bits = [bitstream >> i & 0x1 for i in range(self.block_size)]
         index = list(filter(None, [self.encode(i) if b else None for i, b in enumerate(bits)]))
-        self.log.debug("index: %s", index)
+        self.log.info("index: %s", index)
         if mpl: self.render(index)
         return index
 
@@ -62,9 +62,9 @@ class N2(SpatialCodec):
         self.log.debug("Expected byte size: %s", block)
         for coor in stream:
             bitstream |= self.decode(coor)
-        self.log.debug("decoded bitstream: %s", bin(bitstream))
+        self.log.info("decoded bitstream: %s", bin(bitstream))
         bytestream = bitstream.to_bytes(block, byteorder="big", signed=False)
-        self.log.debug("bytestream: %s", bytestream)
+        self.log.info("bytestream: %s", bytestream)
         return bytestream
 
     def decode(self, coor: Tuple[int, int]) -> int:

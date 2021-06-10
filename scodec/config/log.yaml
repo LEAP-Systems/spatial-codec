@@ -9,22 +9,12 @@ loggers:
   '':
     level: 'INFO'
     handlers: ['console_handler']
-  codec.scodec:
-    level: 'DEBUG'
+  scodec:
+    level: 'INFO'
     handlers: ['console_handler']
     propagate: no
 
 handlers:
-  default_handler:
-    class: 'logging.FileHandler'
-    filename: codec/logs/root.log
-    level: 'DEBUG'
-    formatter: default
-  sc_handler:
-    class: 'logging.FileHandler'
-    level: 'DEBUG'
-    filename: codec/logs/sc.log
-    formatter: default
   console_handler:
     class: 'logging.StreamHandler'
     formatter: default

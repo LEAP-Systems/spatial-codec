@@ -1,4 +1,5 @@
 # Spatial Codec
+[![PyPI version](https://badge.fury.io/py/scodec.svg)](https://badge.fury.io/py/scodec)
 [![ci](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml)
 
 Modified: 2021-06

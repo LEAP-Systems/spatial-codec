@@ -1,0 +1,8 @@
+# include all files in the scodec module
+graft scodec
+
+# exclude all compiler artefacts
+global-exclude *.py[co]
+
+# include requirements.txt
+include requirements.txt
