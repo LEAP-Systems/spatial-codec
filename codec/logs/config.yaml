@@ -17,13 +17,13 @@ loggers:
 handlers:
   default_handler:
     class: 'logging.FileHandler'
-    filename: sc/logs/root.log
+    filename: codec/logs/root.log
     level: 'DEBUG'
     formatter: default
   sc_handler:
     class: 'logging.FileHandler'
     level: 'DEBUG'
-    filename: sc/logs/sc.log
+    filename: codec/logs/sc.log
     formatter: default
   console_handler:
     class: 'logging.StreamHandler'
