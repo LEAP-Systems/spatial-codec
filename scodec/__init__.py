@@ -2,12 +2,13 @@
 Spatial Codec __init___
 ===================================
 
-Logger initialization for spatial codec
+Initialization for spatial codec
 
 Copyright © 2021 LEAP. All Rights Reserved.
 """
 
-# execute logger config
 from scodec.logs.config import config
+from scodec.__version__ import __version__
 
+# execute logger config
 config()
