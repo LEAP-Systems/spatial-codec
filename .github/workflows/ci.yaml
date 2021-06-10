@@ -23,4 +23,4 @@ jobs:
       - name: install lint dependancies
         run: python3 -m pip install flake8
       - name: flake8
-        run: flake8 sc
+        run: flake8 codec 

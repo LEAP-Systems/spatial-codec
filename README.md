@@ -1,7 +1,7 @@
 # Spatial Codec
 [![ci](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/LEAP-Systems/spatial-codec/actions/workflows/ci.yaml)
 
-Modified: 2021-05
+Modified: 2021-06
 
 <p align="center">
   <img src="docs/img/LEAP_INS_WHITE.png"/>
@@ -14,7 +14,7 @@ Modified: 2021-05
   4. [License](#license)
 
 ## About
-Spatial codec is a spatial encoding and decoding algorithm developed for mapping a bytes to a 3D matrix at a target voxel resolution. The algorithm maps according to [Hilbert's Space Filling Curve](https://en.wikipedia.org/wiki/Hilbert_curve) which preserves the relative localization of bits in 3D independant of the matrix dimension which is a convienient property for error correction and scalable network policies.
+Spatial codec is a spatial encoding and decoding algorithm developed for iteratively mapping any number of bytes to a 3D (N3 space) matrix. The algorithm uses a psuedo variant of [Hilbert's Space Filling Curve](https://en.wikipedia.org/wiki/Hilbert_curve) which preserves the relative localization of bits in 3D independant of the matrix dimension which is a convienient property for error correction and scalable network policies.
 
 ## Quickstart
 Install python dependancies
@@ -22,13 +22,13 @@ Install python dependancies
 python3 -m pip install -r requirements.txt
 ...
 ```
-Run the algorithm for a specified data block `-s` / `--string` and dimension `-d` / `--dimension` (2 or 3). The MPL visualizer can be enabled with the `-v=` flag.
+Run the algorithm for a specified block size `-b` / `--block`, with a data stream `-d` / `--data` and dimension `-n` / `--dimension` (2 or 3). The MPL visualizer can be enabled with the `-v=` flag.
 ```bash
-# exec n2 algorithm
-python3 -m sc -s "Hello World" -d 2 -v=
+# n2 codec invocation
+python3 -m codec -n 2 -b 512 -d "Hello World" -v=
 ...
-# exec n3 algorithm
-python3 -m sc -s "H" -d 3 -v=
+# n3 codec invocation 
+python3 -m codec -n 3 -b 8 -d "H" -v=
 ```
 
 ## Dev

@@ -2,4 +2,3 @@ Cython
 matplotlib
 numpy
 PyYaml
-flake8

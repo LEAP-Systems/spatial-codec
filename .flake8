@@ -6,7 +6,7 @@ ignore =
     W503, # bad practice: PEP 8 recommended style, which was changed on April 16th, 2016
     E701, # multiple statements on one line
     E704,  # multiple statements on one line
-max-line-length = 120
+max-line-length = 100
 show-source = True
 builtins = 'self'
 count = True

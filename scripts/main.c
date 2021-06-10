@@ -1,3 +1,7 @@
+/*
+ * https://en.wikipedia.org/wiki/Hilbert_curve
+**/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -11,7 +15,7 @@ int main(int argc, char** argv) {
     uint8_t x = atoi(argv[1]);
     uint8_t y = atoi(argv[2]);
     printf("Computing n2 hilberts curve @ x: %d y: %d\n", x, y);
-    bit = xy2d(64, x, y);
+    bit = xy2d(8, x, y);
     printf("%d\n", bit);
     return 0;
 }
@@ -23,8 +27,8 @@ int xy2d(int n, int x, int y) {
         rx = (x & s) > 0;
         ry = (y & s) > 0;
         d += s * s * ((3 * rx) ^ ry);
-        printf("iteration s: %d\trx: %d\try: %d\td: %d\n", s, rx, ry, d);
         rot(n, &x, &y, rx, ry);
+        printf("s:%d\trx:%d\try:%d\td:%d\tx:%d\ty:%d\n", s, rx, ry, d, x, y);
     }
     return d;
 }
