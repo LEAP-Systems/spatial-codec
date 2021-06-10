@@ -33,4 +33,4 @@ jobs:
       - name: install scodec
         run: |
           python3 -m pip install .
-          python3 -c "import scodec; print("Success on version: {}".format(scodec.__version__))"
+          python3 -c 'import scodec; print("Success on version: {}".format(scodec.__version__))'
