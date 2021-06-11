@@ -1,0 +1,3 @@
+libopenjp2-7
+libatlas-base-dev
+libtiff5

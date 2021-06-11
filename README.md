@@ -24,6 +24,11 @@ python3 -m pip install --upgrade pip
 ...
 python3 -m pip install scodec
 ```
+
+You may be required to install some `apt` packages on some linux distros:
+```bash
+sudo xargs -a apt-packages.txt apt install -y
+```
 ### API
 Spatial codec provides an api for interacting in 2 (`N2`) and 3 (`N3`) dimensional space. Below is an example of using the `N2` space api:
 ```python
