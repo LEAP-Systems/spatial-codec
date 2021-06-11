@@ -10,7 +10,7 @@ NAME = 'scodec'
 DESCRIPTION = 'Spatial encoding algorithm using psuedo hilbert curves'
 EMAIL = 'christian@leapsystems.online'
 AUTHOR = 'cSDes1gn'
-REQUIRES_PYTHON = '>=3.8.0'
+REQUIRES_PYTHON = '>=3.7.0'
 VERSION = False
 
 here = os.path.abspath(os.path.dirname(__file__))
