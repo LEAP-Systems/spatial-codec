@@ -2,8 +2,8 @@ import sys
 import getopt
 import logging
 
-from codec.n3 import N3
-from codec.n2 import N2
+from scodec.codec.n3 import N3
+from scodec.codec.n2 import N2
 
 
 def main(argv) -> None:
