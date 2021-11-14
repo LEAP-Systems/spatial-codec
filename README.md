@@ -18,7 +18,7 @@ Modified: 2021-06
 Spatial codec is a spatial encoding and decoding algorithm developed for iteratively mapping any number of bytes to a 3D (N3 space) matrix. The algorithm uses a psuedo variant of [Hilbert's Space Filling Curve](https://en.wikipedia.org/wiki/Hilbert_curve) which preserves the relative localization of bits in 3D independant of the matrix dimension which is a convienient property for error correction and scalable network policies.
 
 <p align="center">
-  <img src="/docs/img/Codec.gif" width="900" height="450"/>
+  <img src="/docs/img/Codec.gif" width="700" height="400"/>
 </p>
 
 
