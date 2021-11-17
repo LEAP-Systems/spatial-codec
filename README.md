@@ -51,10 +51,10 @@ bytestream = sc.stream_decode(space_encode)
 The codec provides a cli tool for ease of use. Run the algorithm for a specified block size `-b` / `--block`, with a data stream `-d` / `--data` and dimension `-n` / `--dimension` (2 or 3). The MPL visualizer can be enabled with the `-v=` flag.
 ```bash
 # n2 codec invocation
-python3 -m codec -n 2 -b 512 -d "Hello World" -v=
+python3 -m scodec -n 2 -b 512 -d "Hello World" -v=
 ...
 # n3 codec invocation 
-python3 -m codec -n 3 -b 8 -d "H" -v=
+python3 -m scodec -n 3 -b 8 -d "H" -v=
 ```
 
 ## License
