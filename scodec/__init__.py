@@ -26,4 +26,4 @@ with open(CONFIG_PATH) as file:
     logging.config.dictConfig(yaml.full_load(file))
 
 _log = logging.getLogger(__name__)
-_log.info("scodec version: %s", __version__)
+_log.info("Spatial Codec © Version: %s", __version__)
