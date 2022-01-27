@@ -29,7 +29,7 @@ def main(argv) -> None:
             mpl = True
         elif opt in ("-b, --block"):
             block = int(arg)
-     logging.info("Input stream: %s", input_stream)
+    logging.info("Input stream: %s", input_stream)
     logging.info("Byte Encoding: %s", be)
     logging.info("Block size: %s", block)
     logging.info("Encoding dimension: %s", dimension)
